@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>เซียมซีตำหรับเจ้าเรือน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: one centred stage per step; the glossy 3D cup is the hero; prajam-yam flower pattern on a warm peach ground */
+:root{
+  --bg1:#fbf6ef;
+  --bg2:#f1e4d6;
+  --ink:#3a2620;
+  --muted:#7d6a60;
+  --gold:#c9a24a;
+  --pink:#ff8fa3;
+  --card:#ffffff;
+  --c:#94552c; --c-light:#d29560; --c-dark:#4e2810;
+  --display:"Noto Serif Thai","Chonburi",serif;
+  --body:"IBM Plex Sans Thai","Noto Sans Thai",system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{
+  font-family:var(--body);color:var(--ink);font-size:16px;line-height:1.6;
+  background:#fbf0e4;
+  overflow-x:hidden;
+}
+button{font-family:inherit;touch-action:manipulation}
+button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+[tabindex="-1"]:focus,[tabindex="-1"]:focus-visible{outline:none}
+
+/* background: Pam's painted four-element scene */
+.bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;background:#fbf0e4}
+.bg-full{position:absolute;inset:0;background:url("bg-full.jpg") center top/cover no-repeat}
+@media (max-aspect-ratio:1/1){.bg-full{background-position:center center}}
+.bg{transition:background-color .6s}
+.bg > *{transition:opacity .35s ease}
+.bg.swap > *{opacity:0}
+
+
+/* keep small text readable over the painted scene */
+.lead,.sub-hint,.el-kicker,.flip-hint,.disclaimer,.copied,.picked-note{text-shadow:0 0 6px #fbf0e4,0 0 12px #fbf0e4,0 0 2px #fbf0e4}
+
+/* top bar */
+@media (max-width:360px){.brand{font-size:14.5px;min-width:0;overflow:hidden}.bar{gap:8px;padding:10px 12px}.steps{display:none}.mute{margin-left:auto;padding:4px 9px;font-size:12px}}
+.bar{position:relative;z-index:4;display:flex;align-items:center;gap:12px;padding:10px 16px;background:transparent}
+.brand{white-space:nowrap;font:600 17px var(--display);color:var(--c-dark);display:flex;align-items:center;gap:6px;background:none;border:0;cursor:pointer;padding:0}
+.brand svg{width:22px;height:22px}
+.steps{display:flex;gap:6px;margin-left:auto}
+.steps i{width:7px;height:7px;border-radius:50%;background:#e3d3c3;transition:background .3s,transform .3s}
+.steps i.on{background:var(--c);transform:scale(1.25)}
+.mute{white-space:nowrap;flex:none;border:1px solid #e3d3c3;background:transparent;border-radius:99px;padding:5px 12px;font:500 13px var(--body);color:var(--muted);cursor:pointer}
+
+main{max-width:960px;margin:0 auto;padding:12px 16px 48px;overflow-x:clip}
+.screen{display:none}
+.screen.active{display:block;animation:enter .45s cubic-bezier(.2,.9,.3,1.1)}
+@keyframes enter{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
+
+h1,h2{font-family:var(--display);font-weight:700;text-wrap:balance;margin:0}
+h1{font-size:clamp(32px,8.5vw,52px);line-height:1.25;color:var(--c-dark);letter-spacing:.01em}
+h2{font-size:clamp(26px,6.5vw,36px);line-height:1.25}
+.lead{font-size:17px;color:var(--muted);margin:8px auto 0;max-width:34ch}
+.center{text-align:center}
+
+/* buttons */
+.btn{--b:var(--c);--bd:var(--c-dark);font:600 17px var(--body);color:#fff;border:0;border-radius:12px;padding:13px 26px;cursor:pointer;
+  background:var(--b);box-shadow:0 2px 0 var(--bd),0 8px 20px rgba(60,25,15,.14);letter-spacing:.01em;
+  transition:transform .15s,box-shadow .15s,background .15s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 3px 0 var(--bd),0 12px 24px rgba(60,25,15,.18)}
+.btn:active{transform:translateY(1px);box-shadow:0 1px 0 var(--bd)}
+.btn:disabled{filter:grayscale(.4) opacity(.6);cursor:default;transform:none}
+.btn.gold{--b:#c9a24a;--bd:#8d6e27;color:#2e1d08}
+.btn.soft{background:transparent;color:var(--c-dark);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--c) 45%,transparent)}
+.btn.soft:hover{background:rgba(255,255,255,.6);box-shadow:inset 0 0 0 1.5px var(--c)}
+.actions{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:22px}
+
+/* home */
+.hero{display:grid;gap:8px;justify-items:center;text-align:center;padding-top:12px}
+.hero-cup{position:relative;width:min(300px,78vw);aspect-ratio:260/380;margin:6px 0 4px}
+.hero-cup .cupwrap{animation:bob 5s ease-in-out infinite}
+.hero-cup::before{content:"";position:absolute;inset:8% -6% 4%;border-radius:50%;background:radial-gradient(closest-side,rgba(201,162,74,.28),transparent 70%)}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-12px) rotate(6deg)}}
+
+/* cup */
+.cupwrap{width:100%;height:100%;transform-origin:50% 92%}
+.cup-svg{width:100%;height:100%;overflow:visible;display:block}
+.stick-move{transform-box:fill-box;transform-origin:50% 100%}
+.cup-label{font:600 23px var(--display);fill:#f6e3a8}
+
+/* month */
+.months{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}
+@media (max-width:640px){.months{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:380px){.months{grid-template-columns:repeat(2,1fr)}}
+.month{background:rgba(255,255,255,.75);border:1px solid #eadccd;border-radius:14px;padding:16px 8px 14px;cursor:pointer;display:grid;gap:2px;justify-items:center;
+  transition:transform .18s,border-color .18s,box-shadow .18s;color:var(--ink)}
+.month:hover{transform:translateY(-2px);border-color:var(--gold);box-shadow:0 8px 18px rgba(60,25,15,.08)}
+.month b{font:600 19px var(--display)}
+.month span{font-size:13px;color:var(--muted)}
+.month.picked{background:var(--mc);border-color:var(--mcd);color:#fff;animation:pop .35s}
+.month.picked span{color:#fff}
+@keyframes pop{40%{transform:scale(1.05)}100%{transform:scale(1)}}
+.picked-note{min-height:1.6em;text-align:center;margin:18px 0 0;font:600 18px var(--display);color:var(--c-dark)}
+
+/* element */
+.el-card{display:grid;grid-template-columns:minmax(0,240px) 1fr;gap:28px;align-items:center;background:rgba(255,255,255,.82);border-radius:20px;padding:28px;margin-top:8px;
+  border:1px solid #eadccd;box-shadow:0 18px 40px rgba(60,25,15,.08)}
+@media (max-width:640px){.el-card{grid-template-columns:1fr;text-align:center;padding:22px 18px}}
+.el-icon{width:min(200px,56vw);aspect-ratio:1;justify-self:center;border-radius:50%;display:grid;place-items:center;
+  background:radial-gradient(circle at 40% 35%,#fff,color-mix(in srgb,var(--c-light) 35%,#fff) 70%);box-shadow:inset 0 0 0 2px var(--gold),inset 0 0 0 7px #fff,inset 0 0 0 8px color-mix(in srgb,var(--gold) 60%,#fff)}
+.el-icon svg{width:52%;height:52%;filter:drop-shadow(0 4px 4px rgba(0,0,0,.12))}
+.el-kicker{font:600 15px var(--body);color:var(--muted)}
+.el-name{color:var(--c-dark);font-size:clamp(34px,8vw,48px)}
+.info{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:0;text-align:left}
+.info li{display:grid;grid-template-columns:150px 1fr;gap:10px;padding:10px 2px;border-bottom:1px solid #eee2d6}
+@media (max-width:420px){.info li{grid-template-columns:1fr;gap:0}}
+.info b{font-weight:600;color:var(--c-dark)}
+.swatch{display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--c);vertical-align:-2px;margin-right:6px;box-shadow:0 0 0 2px #fff,0 0 0 3px var(--c)}
+
+/* shake */
+.shake-head{text-align:center}
+.shake-head .el-kicker{display:block}
+.stage{container-type:inline-size;position:relative;width:min(320px,84vw);aspect-ratio:260/380;margin:6px auto 0;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.stage .cupwrap{cursor:pointer}
+.stage-shadow{position:absolute;left:12%;right:12%;bottom:1%;height:7%;border-radius:50%;background:radial-gradient(closest-side,rgba(110,40,20,.28),transparent)}
+.flying{position:absolute;background:linear-gradient(90deg,#e2bd7e,#f5dca8 40%,#d5aa66);clip-path:polygon(50% 0,100% var(--tip,5%),100% 100%,0 100%,0 var(--tip,5%));filter:drop-shadow(0 4px 4px rgba(60,25,10,.35));z-index:3;pointer-events:none}
+.flying span{position:absolute;left:50%;transform:translate(-50%,-80%);font-family:"Noto Serif Thai",serif;font-weight:700;color:#5a3517;line-height:1}
+.prayer{text-align:center;white-space:pre-line;font:600 18px/1.5 var(--display);color:#4a2c1a;margin:14px auto 0;max-width:300px;position:relative;
+  padding:16px 22px 12px;border-radius:18px;background:linear-gradient(180deg,#fffaf0,#f6ead2);box-shadow:inset 0 0 0 2px #d8b25a,inset 0 0 0 5px #fffaf0,inset 0 0 0 6px rgba(216,178,90,.5),0 10px 24px rgba(60,25,15,.12)}
+.prayer::before{content:"";position:absolute;left:50%;top:-13px;width:34px;height:22px;transform:translateX(-50%);
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 22'%3E%3Cpath d='M17 1 C21 6 22 12 17 20 C12 12 13 6 17 1Z M17 20 C11 18 7 13 7 8 C12 9 16 14 17 20Z M17 20 C23 18 27 13 27 8 C22 9 18 14 17 20Z M17 21 C10 21 4 18 2 15 C8 14 14 17 17 21Z M17 21 C24 21 30 18 32 15 C26 14 20 17 17 21Z' fill='%23d8a640' stroke='%238a5c10' stroke-width='.6'/%3E%3C/svg%3E") center/contain no-repeat}
+.sub-hint{text-align:center;font-size:14px;color:var(--muted);margin:2px 0 0}
+.result-badge{display:none;margin:14px auto 0;width:max-content;max-width:100%;padding:8px 22px;border-radius:99px;background:#fff;font:600 21px var(--display);color:var(--c-dark);
+  border:1px solid var(--gold);box-shadow:0 8px 20px rgba(60,25,15,.1)}
+.result-badge.show{display:block;animation:badge .5s cubic-bezier(.2,.9,.3,1)}
+@keyframes badge{from{transform:translateY(8px) scale(.9);opacity:0}to{transform:none;opacity:1}}
+.spark{position:absolute;width:6px;height:6px;border-radius:50%;pointer-events:none;z-index:4}
+
+/* slip */
+.card-stage{perspective:1600px;max-width:400px;margin:10px auto 0;container-type:inline-size}
+.card{perspective:1600px}
+.card.unfold{animation:unfold .9s cubic-bezier(.2,.9,.3,1.15) both;transform-origin:50% 0}
+@keyframes unfold{0%{transform:rotateX(80deg) scaleY(.15);opacity:0}60%{transform:rotateX(-10deg) scaleY(1.03);opacity:1}100%{transform:none}}
+.card-inner{display:grid;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.3,1.3,.5,1);cursor:pointer}
+.flipped .card-inner{transform:rotateY(180deg)}
+.face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;position:relative;aspect-ratio:2/3;border-radius:4.5cqw;overflow:hidden;
+  box-shadow:0 24px 50px rgba(40,15,10,.28)}
+.back{transform:rotateY(180deg)}
+.frame{position:absolute;inset:0;width:100%;height:100%;display:block}
+.ribbon{position:absolute;left:24%;right:24%;top:26.2%;height:7%;display:grid;place-items:center;text-align:center;
+  font:700 clamp(15px,5.4cqw,22px)/1 var(--display);color:var(--line)}
+.panel{position:absolute;left:17%;right:17%;top:36%;bottom:15%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#3b2418;overflow:auto}
+.no-label{font:500 clamp(12px,3.4cqw,14px) var(--body);color:var(--line);letter-spacing:.08em}
+.num-seal{width:25cqw;height:25cqw;margin:1.5cqw auto 3cqw;border-radius:50%;display:grid;place-items:center;
+  background:radial-gradient(circle at 40% 35%,var(--c-light),var(--c) 70%);color:#fff;box-shadow:0 0 0 1.5px var(--line),0 0 0 5px #fbeedd,0 0 0 6px color-mix(in srgb,var(--line) 50%,transparent)}
+.num-seal b{font:700 13cqw/1 var(--display)}
+.verse{font:600 clamp(17px,5.6cqw,23px)/1.65 var(--display);margin:0;color:#3b2418;text-wrap:balance}
+.divider{width:40%;height:1px;margin:4cqw auto 0;background:linear-gradient(90deg,transparent,var(--line),transparent)}
+.flip-hint{font-size:clamp(11px,3.1cqw,13px);color:#8a6a58;margin:2.5cqw 0 0}
+.back .panel{justify-content:flex-start;text-align:left;align-items:stretch;padding-top:0;top:35%;bottom:13%}
+.back dl{margin:0;display:grid;gap:2.2cqw}
+.back dt{font:700 clamp(13px,3.9cqw,16px) var(--display);color:var(--line);display:flex;align-items:center;gap:6px}
+.back dt::before{content:"";width:7px;height:7px;transform:rotate(45deg);background:var(--line);flex:none}
+.back dd{margin:.6cqw 0 0;font-size:clamp(12.5px,3.6cqw,15px);line-height:1.5}
+.back .flip-hint{text-align:center;margin-top:auto;padding-top:2cqw}
+@container (max-width:330px){.back .flip-hint{display:none}.back dl{gap:1.4cqw}.back dd{font-size:12px;line-height:1.45}.back dt{font-size:13px}.back .flip-hint{padding-top:1cqw}.verse{font-size:16.5px}}
+.disclaimer{max-width:440px;margin:16px auto 0;text-align:center;font-size:13px;color:var(--muted)}
+.copied{text-align:center;font-size:14px;color:var(--c-dark);min-height:1.4em;margin:8px 0 0}
+
+/* loader */
+.loader{position:fixed;inset:0;z-index:9;display:none;place-items:center;background:rgba(251,246,239,.9);backdrop-filter:blur(4px)}
+.loader.show{display:grid}
+.loader-in{display:grid;justify-items:center;gap:12px;font:600 17px var(--display);color:var(--c-dark)}
+.dots{display:flex;gap:10px}
+.dots i{width:16px;height:16px;border-radius:50%;animation:hop .7s ease-in-out infinite}
+.dots i:nth-child(1){background:#d4552e}.dots i:nth-child(2){background:#76ab5f;animation-delay:.1s}.dots i:nth-child(3){background:#4a8fc9;animation-delay:.2s}.dots i:nth-child(4){background:#8e5e37;animation-delay:.3s}
+@keyframes hop{50%{transform:translateY(-8px);opacity:.5}}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true">
+  <div class="bg-full"></div>
+</div>
+<header class="bar">
+  <button class="brand" id="brand" aria-label="กลับหน้าแรก">
+    <svg viewBox="0 0 40 40" aria-hidden="true"><g fill="#f2607a"><path d="M20 4 Q27 13 20 20 Q13 13 20 4Z"/><path d="M36 20 Q27 27 20 20 Q27 13 36 20Z"/><path d="M20 36 Q13 27 20 20 Q27 27 20 36Z"/><path d="M4 20 Q13 13 20 20 Q13 27 4 20Z"/></g><circle cx="20" cy="20" r="3" fill="#f3b443"/></svg>
+    เซียมซีตำหรับเจ้าเรือน
+  </button>
+  <div class="steps" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+  <button class="mute" id="mute" aria-pressed="false">เสียง เปิด</button>
+</header>
+
+<main>
+  <!-- 1 Home -->
+  <section class="screen" id="s-home" aria-labelledby="h-home">
+    <div class="hero">
+      <h1 id="h-home" tabindex="-1">เซียมซีตำหรับเจ้าเรือน</h1>
+      <p class="lead">ค้นพบธาตุเจ้าเรือนของคุณ แล้วมาลุ้นคำทำนายสุขภาพไปพร้อมกัน</p>
+      <div class="hero-cup" id="heroCup"></div>
+      <button class="btn" id="startBtn">เริ่มเสี่ยงเซียมซี</button>
+    </div>
+  </section>
+
+  <!-- 2 Month -->
+  <section class="screen" id="s-month" aria-labelledby="h-month">
+    <div class="center">
+      <h2 id="h-month" tabindex="-1">คุณเกิดเดือนอะไร</h2>
+      <p class="lead">แตะเดือนเกิดของคุณ ระบบจะหาธาตุเจ้าเรือนให้ทันที</p>
+    </div>
+    <div class="months" id="months"></div>
+    <p class="picked-note" id="pickedNote" aria-live="polite"></p>
+  </section>
+
+  <!-- 3 Element -->
+  <section class="screen" id="s-element" aria-labelledby="h-element">
+    <div class="el-card">
+      <div class="el-icon" id="elIcon"></div>
+      <div>
+        <span class="el-kicker" id="elKicker">ธาตุเจ้าเรือนของคุณคือ</span>
+        <h2 class="el-name" id="h-element" tabindex="-1">ธาตุดิน</h2>
+        <ul class="info" id="elInfo"></ul>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="toShakeBtn">ไปเสี่ยงเซียมซี</button>
+      <button class="btn soft" id="elBackBtn">เปลี่ยนเดือนเกิด</button>
+    </div>
+  </section>
+
+  <!-- 4 Shake -->
+  <section class="screen" id="s-shake" aria-labelledby="h-shake">
+    <div class="shake-head">
+      <span class="el-kicker">กระบอกเซียมซีประจำ</span>
+      <h2 id="h-shake" tabindex="-1" style="color:var(--c-dark)">ธาตุดิน</h2>
+    </div>
+    <div class="stage" id="stage">
+      <div class="stage-shadow"></div>
+      <div class="cupwrap" id="shakeCup" role="button" tabindex="0" aria-label="กระบอกเซียมซี แตะเพื่อเขย่า"></div>
+    </div>
+    <p class="prayer" id="prayer">ตั้งจิตอธิษฐาน
+แล้วเขย่ากระบอกเซียมซี</p>
+    <p class="sub-hint" id="subHint">กดปุ่ม หรือแตะ/ปัดที่กระบอกก็ได้</p>
+    <div class="result-badge" id="resultBadge" aria-live="polite"></div>
+    <div class="actions">
+      <button class="btn" id="shakeBtn">เขย่าเซียมซี</button>
+      <button class="btn gold" id="openSlipBtn" hidden>เปิดอ่านคำทำนาย</button>
+    </div>
+  </section>
+
+  <!-- 5 Slip -->
+  <section class="screen" id="s-slip" aria-labelledby="h-slip">
+    <h2 class="center" id="h-slip" tabindex="-1" style="font-size:24px;color:var(--c-dark)">ใบเซียมซีของคุณ</h2>
+    <div class="card-stage">
+      <div class="card" id="card">
+        <div class="card-inner" id="cardInner" role="button" tabindex="0" aria-label="แตะเพื่อพลิกใบเซียมซี">
+          <div class="face front">
+            <div class="frame" id="frameF"></div>
+            <div class="ribbon" id="fEl">ธาตุไฟ</div>
+            <div class="panel">
+              <span class="no-label">เซียมซีใบที่ <span id="fNumAr">1</span></span>
+              <div class="num-seal"><b id="fNum">๑</b></div>
+              <p class="verse" id="fVerse"></p>
+              <div class="divider"></div>
+              <p class="flip-hint">แตะการ์ดเพื่อพลิกอ่านความหมาย</p>
+            </div>
+          </div>
+          <div class="face back">
+            <div class="frame" id="frameB"></div>
+            <div class="ribbon" id="bTitle">ธาตุไฟ · ใบที่ ๑</div>
+            <div class="panel">
+              <dl>
+                <div><dt>ความหมาย</dt><dd id="bMeaning"></dd></div>
+                <div><dt>ข้อควรระวัง</dt><dd id="bCaution"></dd></div>
+                <div><dt>เมนูแนะนำ</dt><dd id="bMenu"></dd></div>
+                <div><dt>เครื่องหอมประจำใบ</dt><dd id="bScent"></dd></div>
+              </dl>
+              <p class="flip-hint">แตะอีกครั้งเพื่อกลับด้านหน้า</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="actions" style="margin-top:18px">
+      <button class="btn soft" id="flipBtn">พลิกอ่านความหมาย</button>
+      <button class="btn soft" id="copyBtn">คัดลอกคำทำนาย</button>
+    </div>
+    <p class="copied" id="copied" aria-live="polite"></p>
+    <div class="actions" style="margin-top:6px">
+      <button class="btn" id="againBtn">เสี่ยงเซียมซีอีกครั้ง</button>
+      <button class="btn gold" id="toMonthBtn">กลับไปเลือกเดือนเกิด</button>
+      <button class="btn soft" id="restartBtn">เริ่มต้นใหม่</button>
+    </div>
+    <p class="disclaimer">เพื่อความรู้และความบันเทิงตามความเชื่อแพทย์แผนไทย ไม่ใช่การวินิจฉัยโรค หากมีอาการผิดปกติควรปรึกษาแพทย์</p>
+  </section>
+</main>
+
+<div class="loader" id="loader" aria-hidden="true"><div class="loader-in"><div class="dots"><i></i><i></i><i></i><i></i></div><span id="loaderText">กำลังเตรียมกระบอกเซียมซี...</span></div></div>
+
+<script>
+/* ============ ข้อมูล: ธาตุ ============ */
+const ELEMENTS = {
+  fire:  { name:"ไฟ", months:"มกราคม – มีนาคม",   cupColor:"แดงส้ม",  taste:"ขม เย็น จืด",        trait:"กระตือรือร้น กล้าตัดสินใจ",   caution:"ร้อนใน สิว กรดไหลย้อน และอารมณ์ฉุนเฉียว",
+           c:"#d4552e", light:"#f0a07e", dark:"#8e2c12" },
+  wind:  { name:"ลม", months:"เมษายน – มิถุนายน",  cupColor:"เขียวอ่อน", taste:"เผ็ดร้อน",           trait:"คล่องแคล่ว ช่างพูด คิดไว",     caution:"ท้องอืด นอนไม่หลับ เวียนศีรษะ และปวดข้อ",
+           c:"#76ab5f", light:"#bcdcaa", dark:"#3f6b31" },
+  water: { name:"น้ำ", months:"กรกฎาคม – กันยายน", cupColor:"ฟ้า",     taste:"เปรี้ยว",             trait:"ผิวพรรณดี สุขุม อ่อนโยน",      caution:"หวัด เสมหะ ภูมิแพ้ และอาการบวมน้ำ",
+           c:"#4a8fc9", light:"#a6cdee", dark:"#1f5181" },
+  earth: { name:"ดิน", months:"ตุลาคม – ธันวาคม",  cupColor:"น้ำตาล",   taste:"ฝาด หวาน มัน เค็ม",   trait:"แข็งแรง อดทน หนักแน่น",       caution:"ข้อ กระดูก ท้องผูก และน้ำหนักเกิน",
+           c:"#8a4f2a", light:"#c98b58", dark:"#46230d" }
+};
+const MONTHS = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+const elementOfMonth = m => m < 3 ? "fire" : m < 6 ? "wind" : m < 9 ? "water" : "earth";
+
+/* ============ ข้อมูล: คำทำนาย 28 ใบ (ตามเอกสาร "คำทำนายเซียมซีธาตุเจ้าเรือน") ============ */
+const FORTUNES = {
+  earth: [
+    { no:1, verse:"ดินมั่นคงดั่งขุนเขา ใจหนักแน่นเบาไม่หวั่นไหว", meaning:"ร่างกายแข็งแรง มีแรงทำงานเต็มที่ คนรอบข้างพึ่งพาได้", caution:"ปวดเมื่อยข้อเข่าเมื่อยืนหรือเดินนาน", menu:"ฟักทองผัดไข่ · น้ำฝรั่ง" },
+    { no:2, verse:"ปลูกสิ่งใดในดินดี ย่อมงอกงามมีผลยั่งยืน", meaning:"นิสัยดีๆ ที่เริ่มตอนนี้จะอยู่กับคุณได้นาน เช่น ดื่มน้ำให้พอหรือเดินทุกเย็น", caution:"กินเพลินจนน้ำหนักขึ้นโดยไม่รู้ตัว", menu:"ข้าวกล้อง · ถั่วเขียวต้มน้ำตาลน้อย" },
+    { no:3, verse:"ดินแน่นหนาฟ้ามิอาจสะเทือน แต่อย่าให้เรือนใจหนักเกิน", meaning:"ภายนอกดูนิ่ง แต่เก็บความเครียดไว้เงียบๆ ลองเล่าให้คนใกล้ตัวฟังบ้าง", caution:"ท้องผูก ท้องอืดเมื่อเครียด", menu:"ผัดผักรวมใส่เห็ด · กล้วยน้ำว้า" },
+    { no:4, verse:"ฝนพรำชุ่มดินถิ่นงาม สุขภาพอร่ามตามฤดู", meaning:"ดูแลตัวเองตามฤดูกาลแล้วจะสดชื่นทั้งปี", caution:"ผิวแห้งแตกช่วงหน้าหนาว", menu:"ซุปมันเทศ · น้ำมะตูม" },
+    { no:5, verse:"หินผาตั้งตระหง่านนานปี เพียรดีย่อมมีสุขยืนยาว", meaning:"ความอดทนคือจุดแข็ง แต่อย่าฝืนร่างกายจนเกินไป", caution:"ปวดหลังจากการนั่งนาน ลุกขยับทุกชั่วโมง", menu:"ปลานึ่งซีอิ๊ว · ฝรั่ง" },
+    { no:6, verse:"ดินร่วนซุยใจเปิดกว้าง มิตรมาสร้างทางสุขใจ", meaning:"จะมีเพื่อนชวนทำสิ่งดีๆ เช่น ออกกำลังกายด้วยกัน ตอบรับได้เลย", caution:"ของมันของหวานเกินพอดีเวลาไปงานเลี้ยง", menu:"ยำถั่วพู · เต้าหู้ทรงเครื่อง" },
+    { no:7, verse:"ก่อเจดีย์ทรายทีละน้อย สะสมคอยวันสำเร็จผล", meaning:"เป้าหมายสุขภาพที่ตั้งไว้จะสำเร็จ ถ้าทำทีละนิดสม่ำเสมอ", caution:"ขี้เกียจออกกำลังกายช่วงท้ายปี", menu:"เผือกนึ่งคลุกงา · น้ำเต้าหู้" }
+  ],
+  water: [
+    { no:1, verse:"น้ำใสไหลเย็นเห็นถึงท้อง ใจผ่องใสสดนำทางดี", meaning:"ใจเย็นและมองโลกด้านดี ทำให้ผ่านเรื่องยากได้ง่าย", caution:"หวัดคัดจมูกตอนอากาศเปลี่ยน", menu:"ต้มยำน้ำใส · น้ำมะนาวอุ่น" },
+    { no:2, verse:"สายน้ำคดเคี้ยวเลี้ยวอ้อมผา สุดท้ายก็มาถึงทะเล", meaning:"เจออุปสรรคก็หาทางออกได้เสมอ อย่าเพิ่งท้อใจ", caution:"นอนดึกจนตื่นมาตาบวม ตัวบวม", menu:"แกงส้มผักรวม · ส้มโอ" },
+    { no:3, verse:"ฝนตกพรำอย่าเพิ่งพร่ำเพ้อ ดูแลเธอให้อบอุ่นกาย", meaning:"ช่วงนี้ควรให้เวลากับตัวเองมากขึ้น พักผ่อนให้พอ", caution:"ตากฝนหรืออยู่ในห้องแอร์เย็นจัดนานๆ", menu:"ต้มข่าไก่ · น้ำมะขาม" },
+    { no:4, verse:"บัวพ้นน้ำบานสะพรั่ง สดใสดังคนทั้งผองพอใจ", meaning:"เสน่ห์ดี คนรอบตัวเอ็นดู ร่างกายดูสดใสถ้าดูแลต่อเนื่อง", caution:"ของหวานและของเย็นทำให้เสมหะมาก", menu:"ยำมะม่วงเบาไข่มัน · มะเขือเทศสด" },
+    { no:5, verse:"น้ำนิ่งไหลลึกควรหมั่นไหว อย่านอนใจนั่งนิ่งทั้งวัน", meaning:"ถึงเวลาขยับตัวมากขึ้น เดิน ว่ายน้ำ หรือเต้นก็ได้", caution:"น้ำหนักขึ้นจากการนั่งนาน", menu:"ต้มยำปลากะพง · สับปะรด" },
+    { no:6, verse:"น้ำค้างใบบัวพราวแสง เล็กแต่แจ้งค่าอย่ามองข้าม", meaning:"เรื่องเล็กๆ ที่ทำทุกวัน เช่น นอนให้ตรงเวลา ส่งผลดีกว่าที่คิด", caution:"ภูมิแพ้ฝุ่นและอากาศเย็นตอนเช้า", menu:"แกงส้มดอกแค · น้ำกระเจี๊ยบ" },
+    { no:7, verse:"น้ำหยดลงหินทุกวันวาน นานไปหินก่อนนั้นยังกร่อน", meaning:"ความสม่ำเสมอชนะทุกอย่าง สุขภาพดีขึ้นทีละนิด", caution:"ดื่มน้ำเย็นจัดตอนท้องว่าง", menu:"ผัดผักบุ้งใส่มะขาม · น้ำมะนาวผสมน้ำผึ้ง" }
+  ],
+  wind: [
+    { no:1, verse:"ลมพัดแผ่วเบาเย็นชื่น ใจร่าเริงตื่นทุกเช้าวัน", meaning:"อารมณ์ดี คนรอบตัวสดใสไปด้วยเมื่ออยู่ใกล้คุณ", caution:"ท้องอืดเฟ้อเมื่อกินไม่ตรงเวลา", menu:"ต้มข่าไก่ · น้ำขิงอุ่น" },
+    { no:2, verse:"ลมพาเมฆลอยไกล ความคิดใหม่พาใจไปถึงฝัน", meaning:"ไอเดียดีๆ กำลังมา จดไว้แล้วลงมือทำทีละอย่าง", caution:"คิดมากจนนอนไม่หลับ วางมือถือก่อนนอน 1 ชั่วโมง", menu:"ไก่ผัดขิง · น้ำตะไคร้" },
+    { no:3, verse:"ลมแรงต้นไม้ยังเอน อย่าเร่งจนเกินกำลังตน", meaning:"งานเยอะแต่ผ่านได้ ถ้าแบ่งเวลาพักไว้ด้วย", caution:"วิงเวียน ปวดหัวเมื่อพักน้อย", menu:"ผัดกะเพราไก่ · น้ำกระชาย" },
+    { no:4, verse:"ว่าวลอยลมสูงเด่น เชือกยังเน้นให้มั่นคง", meaning:"จะได้ไปไกลถ้ามีหลักยึด ตั้งเวลากินนอนให้เป็นเวลา", caution:"ผิวแห้ง ริมฝีปากแตกช่วงลมหนาว", menu:"แกงเลียง · น้ำขิงใส่มะนาว" },
+    { no:5, verse:"ลมหายใจเข้าออกยาว ความกังวลเบาคลายคล้อย", meaning:"เรื่องที่กังวลอยู่จะคลี่คลาย ลองหายใจช้าๆ ก่อนนอน", caution:"ใจสั่น กระสับกระส่ายเมื่อดื่มกาแฟมาก", menu:"แกงป่าปลา · น้ำใบเตยใส่ตะไคร้" },
+    { no:6, verse:"ลมเหนือพัดมาหนาวเยือก อบอุ่นเลือกกินให้พอดี", meaning:"อาหารร้อนๆ คือยาดีของคุณในหน้าหนาว", caution:"ปวดตามข้อและตะคริวเมื่ออากาศเย็น", menu:"ผัดฉ่าทะเล · น้ำขิงต้มน้ำตาลอ้อย" },
+    { no:7, verse:"ลมสงบเมื่อฟ้าสาง เห็นทางกว้างใจสบาย", meaning:"เมื่อใจนิ่งจะตัดสินใจได้ดี เรื่องที่ค้างคาจะลงตัว", caution:"กินข้าวไม่ตรงเวลาจนกระเพาะอักเสบ", menu:"แกงจืดใส่พริกไทย · น้ำข่าอุ่น" }
+  ],
+  fire: [
+    { no:1, verse:"ไฟส่องทางสว่างกลางคืน ใจชื่นฟื้นกำลังเต็มเปี่ยม", meaning:"พลังเต็มเปี่ยม เป็นแรงบันดาลใจให้คนรอบตัว", caution:"ร้อนใน ปากเปื่อยเมื่อพักผ่อนน้อย", menu:"แกงจืดมะระยัดไส้ · น้ำใบบัวบก" },
+    { no:2, verse:"ไฟแรงอย่าเผาจนหมดฟืน ใจเย็นไว้คืนสุขทุกทาง", meaning:"เจอเรื่องให้หงุดหงิด นับ 1 ถึง 10 ก่อนตอบ แล้วจะได้ผลดีกว่า", caution:"ปวดหัวและความดันขึ้นเมื่อเครียด", menu:"แกงจืดตำลึง · น้ำใบเตย" },
+    { no:3, verse:"เปลวเทียนสว่างนวลในห้อง อบอุ่นปกป้องคนรอบกาย", meaning:"ความใส่ใจของคุณทำให้คนในบ้านสุขภาพดีไปด้วย", caution:"ดูแลคนอื่นจนลืมกินข้าว กรดไหลย้อน", menu:"ฟักเขียวต้มกระดูกหมู · แตงโม" },
+    { no:4, verse:"แดดเที่ยงจ้าหาร่มเงา พักใจเบาๆ เติมแรงให้กาย", meaning:"ทำงานหนักมานาน ถึงเวลาหยุดพักสักวัน ไม่ต้องรู้สึกผิด", caution:"นอนดึกจนสิวขึ้น ตาแห้ง", menu:"ผัดบวบใส่ไข่ · น้ำเก๊กฮวย" },
+    { no:5, verse:"ฟ้าคำรามไฟสีส้ม โน้มน้าวใจให้คิดให้ดี", meaning:"ก่อนตัดสินใจเรื่องใหญ่ นอนหลับให้สนิทก่อนสักคืน", caution:"กินเผ็ดจัดทอดมันจนแสบท้อง", menu:"แกงหน่อไม้ใบย่านาง · น้ำมะพร้าว" },
+    { no:6, verse:"น้ำค้างเช้าดับไฟให้อ่อนลง กายใจคงเย็นสบายทั้งวัน", meaning:"เริ่มวันด้วยน้ำเปล่าสักแก้ว แล้วทั้งวันจะไม่หงุดหงิดง่าย", caution:"ดื่มน้ำน้อยจนปัสสาวะสีเข้ม", menu:"แกงจืดเต้าหู้หมูสับ · แตงกวา" },
+    { no:7, verse:"ไฟในเตาหุงข้าวหอมกรุ่น พอดีอบอุ่นไม่ร้อนไม่มอด", meaning:"ความพอดีคือกุญแจ ทำงานและพักให้สมดุล สุขภาพจะดีตลอดปี", caution:"หิวบ่อยจนกินจุกจิกทั้งวัน", menu:"มะระผัดไข่ · น้ำใบเตยไม่หวาน" }
+  ]
+};
+/* ============ ข้อมูล: เครื่องหอมประจำใบ (ตามไฟล์ "เครื่องหอมตามธาตุเจ้าเรือน") ============
+   ชนิดที่ 1–7 จับคู่กับใบเซียมซีใบที่ 1–7 ของธาตุเดียวกัน */
+const SCENT_THEME = {
+  fire:"กลิ่นหอมเย็น ช่วยให้สดชื่น", wind:"กลิ่นหอมร้อน ช่วยขับลม",
+  water:"กลิ่นซ่าเปรี้ยว ช่วยให้หายใจโล่ง", earth:"กลิ่นไม้ ราก ยางไม้ ให้ความมั่นคง"
+};
+const SCENTS = {
+  fire:  [["ดอกมะลิ","ดอกไม้หอมเย็น"],["เกสรบัวหลวง","ดอกไม้หอมเย็น"],["ดอกพิกุล","ดอกไม้หอมเย็น"],["ดอกบุนนาค","ดอกไม้หอมเย็น"],["ดอกสารภี","ดอกไม้หอมเย็น"],["ดอกกระดังงา","ดอกไม้หอม"],["ใบเตยหอม","ใบหอมเย็น"]],
+  wind:  [["ตะไคร้","ต้น / น้ำมันหอมระเหย"],["ขิง","เหง้า"],["ข่า","เหง้า"],["ไพล","เหง้า"],["กานพลู","ดอกตูมแห้ง"],["อบเชย","เปลือกต้น"],["โป๊ยกั๊ก","ผลแห้ง"]],
+  water: [["ผิวมะกรูด","ผิวผล"],["ใบมะกรูด","ใบ"],["ผิวมะนาว","ผิวผล"],["ผิวส้มซ่า","ผิวผล"],["ดอกส้มโอ","ดอก"],["สะระแหน่","ใบ"],["การบูร","ผลึกจากเนื้อไม้"]],
+  earth: [["ไม้กฤษณา","เนื้อไม้"],["ไม้จันทน์หอม","เนื้อไม้"],["กำยาน","ยางไม้"],["รากแฝกหอม","ราก"],["เปลือกชะลูด","เปลือกเถา"],["เปราะหอม","เหง้า"],["ลูกจันทน์","เมล็ด"]]
+};
+const scentText = (el, no) => { const [n, part] = SCENTS[el][no - 1]; return `${n} (${part})`; };
+
+const DISCLAIMER = "เพื่อความรู้และความบันเทิงตามความเชื่อแพทย์แผนไทย ไม่ใช่การวินิจฉัยโรค หากมีอาการผิดปกติควรปรึกษาแพทย์";
+
+/* ============ ตัวช่วย ============ */
+const $ = id => document.getElementById(id);
+const thaiNum = n => String(n).replace(/\d/g, d => "๐๑๒๓๔๕๖๗๘๙"[d]);
+const REDUCE = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const wait = ms => new Promise(r => setTimeout(r, ms));
+/* สุ่มเท่ากันทุกใบ ด้วย crypto และ rejection sampling (ไม่ขึ้นกับแรงหรือเวลาเขย่า) */
+function randInt(n){
+  try{
+    const max = Math.floor(0x100000000 / n) * n, a = new Uint32Array(1);
+    do { crypto.getRandomValues(a); } while (a[0] >= max);
+    return a[0] % n;
+  }catch(e){ return Math.floor(Math.random() * n); }
+}
+function setTheme(c, light, dark){
+  const s = document.documentElement.style;
+  s.setProperty("--c", c); s.setProperty("--c-light", light); s.setProperty("--c-dark", dark);
+}
+const HOME_THEME = ["#94552c","#d29560","#4e2810"];
+
+/* ============ ไอคอนธาตุ ============ */
+function icon(key, top, bottom){
+  const e = ELEMENTS[key], id = "ig" + key + Math.random().toString(36).slice(2,6);
+  const grad = `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${top || e.light}"/><stop offset="1" stop-color="${bottom || e.c}"/></linearGradient></defs>`;
+  const shapes = {
+    fire:`<path d="M50 6 C62 28 82 40 80 62 C78 84 63 94 50 94 C35 94 20 84 20 62 C20 46 32 38 37 22 C43 34 45 40 50 43 C55 32 54 18 50 6Z" fill="url(#${id})"/><path d="M50 50 C57 60 64 66 63 76 C62 85 56 90 50 90 C43 90 37 85 37 76 C37 68 45 62 50 50Z" fill="#ffe08a" opacity=".85"/>`,
+    wind:`<circle cx="50" cy="54" r="40" fill="url(#${id})"/><path d="M22 40 H58 C70 40 72 26 62 24 C56 23 52 28 55 33" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M18 52 H70 C84 52 84 70 74 72" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/>`,
+    water:`<path d="M50 6 C64 30 82 46 82 64 C82 82 67 95 50 95 C33 95 18 82 18 64 C18 46 36 30 50 6Z" fill="url(#${id})"/><ellipse cx="36" cy="46" rx="6" ry="10" fill="#fff" opacity=".55" transform="rotate(25 36 46)"/>`,
+    earth:`<path d="M4 90 L36 30 L52 54 L64 38 L96 90 Z" fill="url(#${id})"/><path d="M36 30 L28 45 L34 42 L38 47 L44 41Z" fill="#fff" opacity=".85"/><rect x="4" y="86" width="92" height="8" rx="4" fill="${e.dark}"/>`
+  };
+  return `<svg viewBox="0 0 100 100" aria-hidden="true">${grad}${shapes[key]}</svg>`;
+}
+
+/* ============ กระบอกเซียมซี 3D (SVG) ============ */
+const STICK_TOPS = [52, 40, 32, 28, 32, 40, 52];
+const stickX = i => 82 + i * 16;
+const stickAngle = x => ((x - 130) * 0.1).toFixed(2);
+function cupSVG(p, label){
+  let sticks = "";
+  STICK_TOPS.forEach((top, i) => {
+    const n = i + 1, x = stickX(i);
+    sticks += `<g class="stick" data-n="${n}"><g transform="rotate(${stickAngle(x)} ${x} 250)"><g class="stick-move">
+      <path d="M${x-11} ${top+12} L${x} ${top} L${x+11} ${top+12} L${x+11} 250 L${x-11} 250 Z" fill="url(#${p}stick)" stroke="#b98a4c" stroke-width=".8"/>
+      <path d="M${x-8} ${top+13} L${x} ${top+5} L${x+8} ${top+13}" fill="none" stroke="#c99a5a" stroke-width=".8" opacity=".7"/>
+      <g transform="translate(${x} ${top+27}) scale(.85)" fill="#c4923a">
+        <circle r="2.2" fill="#a0702a"/>
+        <ellipse cx="0" cy="-4.6" rx="2" ry="3"/><ellipse cx="0" cy="4.6" rx="2" ry="3"/><ellipse cx="-4.6" cy="0" rx="3" ry="2"/><ellipse cx="4.6" cy="0" rx="3" ry="2"/>
+        <path d="M-12 0 Q-9 -3 -7 0 Q-9 3 -12 0Z M12 0 Q9 -3 7 0 Q9 3 12 0Z"/>
+      </g>
+      <text x="${x}" y="${top+58}" text-anchor="middle" style="font:700 19px 'Noto Serif Thai',serif" fill="#5a3517">${n}</text>
+      <rect x="${x-11}" y="${top+12}" width="3" height="${238-top}" fill="#fff" opacity=".18"/>
+    </g></g></g>`;
+  });
+  const scroll = `<path d="M70 198 C84 196 96 200 100 210 C103 219 95 225 89 221 C84 217 87 211 92 213" /><path d="M100 210 C108 203 118 203 124 197" /><path d="M70 198 C70 206 74 212 80 214" />`;
+  const scrollB = `<path d="M70 288 C84 290 96 286 100 276 C103 267 95 261 89 265 C84 269 87 275 92 273" /><path d="M100 276 C108 283 118 283 124 289" /><path d="M70 288 C70 280 74 274 80 272" />`;
+  let flower = "";
+  for (let k = 0; k < 8; k++) flower += `<ellipse cx="0" cy="-7" rx="3.2" ry="6" transform="rotate(${k*45})"/>`;
+  return `<svg class="cup-svg" viewBox="0 0 260 380" aria-hidden="true">
+  <defs>
+    <linearGradient id="${p}body" x1="0" x2="1">
+      <stop offset="0" style="stop-color:var(--c-dark)"/><stop offset=".18" style="stop-color:var(--c)"/>
+      <stop offset=".36" style="stop-color:var(--c-light)"/><stop offset=".55" style="stop-color:var(--c)"/>
+      <stop offset=".85" style="stop-color:var(--c-dark)"/><stop offset="1" style="stop-color:var(--c-dark)"/>
+    </linearGradient>
+    <linearGradient id="${p}lip" x1="0" x2="1">
+      <stop offset="0" style="stop-color:var(--c-dark)"/><stop offset=".35" style="stop-color:var(--c-light)"/><stop offset=".7" style="stop-color:var(--c)"/><stop offset="1" style="stop-color:var(--c-dark)"/>
+    </linearGradient>
+    <radialGradient id="${p}inner" cx=".5" cy=".6" r=".7"><stop offset="0" stop-color="#1a0d08"/><stop offset="1" style="stop-color:var(--c-dark)"/></radialGradient>
+    <linearGradient id="${p}stick" x1="0" x2="1"><stop offset="0" stop-color="#e2bd7e"/><stop offset=".4" stop-color="#f5dca8"/><stop offset="1" stop-color="#d5aa66"/></linearGradient>
+    <linearGradient id="${p}gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a8761c"/><stop offset=".35" stop-color="#ffe59a"/><stop offset=".6" stop-color="#e2b043"/><stop offset="1" stop-color="#9b6a14"/></linearGradient>
+    <linearGradient id="${p}shade" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".35"/><stop offset=".3" stop-color="#fff" stop-opacity=".12"/><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></linearGradient>
+    <filter id="${p}grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.28 0.012" numOctaves="3" seed="7"/>
+      <feColorMatrix values="0 0 0 0 .16  0 0 0 0 .07  0 0 0 0 .02  1.5 0 0 0 -.62"/>
+    </filter>
+    <clipPath id="${p}clip"><path d="M64 160 L64 322 A66 14 0 0 0 196 322 L196 160 Z"/><path d="M52 328 A78 16 0 0 0 208 328 L208 348 A78 16 0 0 1 52 348 Z"/><path d="M58 150 A72 17 0 0 0 202 150 L202 164 A72 17 0 0 1 58 164 Z"/></clipPath>
+  </defs>
+  <ellipse cx="130" cy="348" rx="80" ry="17" style="fill:var(--c-dark)"/>
+  <path d="M52 328 A78 16 0 0 0 208 328 L208 348 A78 16 0 0 1 52 348 Z" fill="url(#${p}lip)"/>
+  <ellipse cx="130" cy="328" rx="78" ry="16" style="fill:var(--c)"/>
+  <ellipse cx="130" cy="327" rx="70" ry="13" style="fill:var(--c-light)" opacity=".35"/>
+  <ellipse cx="130" cy="150" rx="72" ry="17" fill="url(#${p}lip)"/>
+  <ellipse cx="130" cy="151" rx="61" ry="12" fill="url(#${p}inner)"/>
+  <g class="sticks">${sticks}</g>
+  <path d="M64 160 L64 322 A66 14 0 0 0 196 322 L196 160 Z" fill="url(#${p}body)"/>
+  <path d="M58 150 A72 17 0 0 0 202 150 L202 164 A72 17 0 0 1 58 164 Z" fill="url(#${p}lip)"/>
+  <rect x="50" y="130" width="160" height="240" filter="url(#${p}grain)" clip-path="url(#${p}clip)"/>
+  <path d="M64 160 L64 322 A66 14 0 0 0 196 322 L196 160 Z" fill="url(#${p}shade)"/>
+  <path d="M60 152 A70 15 0 0 0 200 152" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1.5"/>
+  <g fill="none" stroke="url(#${p}gold)" stroke-linecap="round">
+    <path d="M64 176 A66 14 0 0 0 196 176" stroke-width="5"/>
+    <path d="M64 185 A66 14 0 0 0 196 185" stroke-width="1.6"/>
+    <path d="M64 298 A66 14 0 0 0 196 298" stroke-width="1.6"/>
+    <path d="M64 307 A66 14 0 0 0 196 307" stroke-width="5"/>
+  </g>
+  <g fill="none" stroke="url(#${p}gold)" stroke-width="2.6" stroke-linecap="round">
+    ${scroll}<g transform="translate(260 0) scale(-1 1)">${scroll}</g>
+    ${scrollB}<g transform="translate(260 0) scale(-1 1)">${scrollB}</g>
+  </g>
+  <g fill="url(#${p}gold)" stroke="#8a5c10" stroke-width=".8" stroke-linejoin="round">
+    <path d="M130 268 C112 276 94 274 84 266 C100 259 118 260 130 268Z"/><path d="M130 268 C148 276 166 274 176 266 C160 259 142 260 130 268Z"/>
+    <path d="M130 266 C104 266 90 252 86 238 C104 236 122 250 130 266Z"/><path d="M130 266 C156 266 170 252 174 238 C156 236 138 250 130 266Z"/>
+    <path d="M130 264 C112 256 102 238 104 220 C118 226 128 244 130 264Z"/><path d="M130 264 C148 256 158 238 156 220 C142 226 132 244 130 264Z"/>
+    <path d="M130 206 C144 222 146 244 130 264 C114 244 116 222 130 206Z"/>
+    <path d="M130 228 C136 238 136 250 130 260 C124 250 124 238 130 228Z" fill="#ffefb8" stroke="none" opacity=".55"/>
+  </g>
+  <g transform="translate(130 288)" fill="url(#${p}gold)" stroke="#8a5c10" stroke-width=".6">${flower}<circle r="3.6" fill="#ffe59a"/></g>
+  <path d="M74 196 L74 290" stroke="#fff" stroke-opacity=".14" stroke-width="7" stroke-linecap="round"/>
+</svg>`;
+}
+
+/* ============ กรอบการ์ดคำทำนายตามธาตุ ============ */
+const CARD = {
+  fire:  { bg1:"#3a0f10", bg2:"#7a2418", t1:"#cf4a34", t2:"#ee8456", t3:"#fbc48c", line:"#b85a2e", glow:"#ffb27a" },
+  water: { bg1:"#0c2238", bg2:"#1d4c78", t1:"#2f6fa8", t2:"#5f9fd4", t3:"#b4dcf5", line:"#3f78ad", glow:"#bfe4ff" },
+  wind:  { bg1:"#132a1e", bg2:"#2d5a3d", t1:"#4e8a5c", t2:"#84bd84", t3:"#cfeabf", line:"#5c8a4c", glow:"#dff5c8" },
+  earth: { bg1:"#2a170b", bg2:"#5e3a1c", t1:"#8a5a30", t2:"#b88a52", t3:"#e6c48e", line:"#97652f", glow:"#ffe0a8" }
+};
+const MOTIF = {
+  fire: [
+    "M0 600 V396 C18 428 24 456 14 484 C34 472 46 446 38 414 C64 446 72 488 58 522 C80 508 90 484 86 452 C114 490 120 544 98 600 Z",
+    "M0 600 V466 C14 486 18 506 10 528 C30 518 38 498 34 476 C52 500 56 532 46 558 C62 548 70 530 68 508 C88 534 92 572 78 600 Z",
+    "M0 600 V528 C10 540 13 554 8 568 C22 560 28 548 26 532 C38 550 40 574 32 600 Z"],
+  water: [
+    "M0 600 V436 C32 424 64 446 74 478 C80 500 66 518 50 512 C38 507 41 491 53 494 C74 500 96 524 116 546 C132 562 144 582 152 600 Z",
+    "M0 600 V498 C26 490 50 504 56 526 C60 542 48 552 37 547 C28 543 32 532 41 534 C62 540 82 570 94 600 Z",
+    "M0 600 V552 C17 547 32 556 36 569 C38 578 31 583 25 579 C42 585 52 592 56 600 Z"],
+  wind: [
+    "M0 600 V446 C22 434 48 448 50 472 C72 462 96 478 94 502 C118 498 136 520 128 544 C150 550 158 580 144 600 Z",
+    "M0 600 V506 C18 498 38 510 38 528 C56 523 72 536 70 554 C88 556 98 578 90 600 Z",
+    "M0 600 V556 C10 552 22 558 22 568 C34 566 42 576 40 588 C46 592 48 596 46 600 Z"],
+  earth: [
+    "M0 600 V420 L34 462 L62 430 L104 496 L124 474 L160 600 Z",
+    "M0 600 V492 L26 514 L54 486 L92 548 L108 600 Z",
+    "M18 600 C24 566 50 548 76 552 C68 576 46 594 18 600Z M6 560 C4 534 18 514 40 508 C42 530 28 552 6 560Z"]
+};
+const EXTRA = {
+  fire: c => `<g fill="${c.t3}" opacity=".85"><path d="M120 470 C126 462 132 462 134 456 C134 466 128 472 120 470Z"/><path d="M280 470 C274 462 268 462 266 456 C266 466 272 472 280 470Z"/></g>`,
+  water: c => `<g fill="none" stroke="${c.t3}" stroke-width="1.6" opacity=".85"><circle cx="118" cy="500" r="5"/><circle cx="130" cy="482" r="3"/><circle cx="282" cy="500" r="5"/><circle cx="270" cy="482" r="3"/></g>`,
+  wind: c => `<g fill="none" stroke="${c.t3}" stroke-width="2.4" stroke-linecap="round" opacity=".9"><path d="M14 476 C44 464 66 492 48 504 C36 512 26 498 36 492"/><path d="M386 476 C356 464 334 492 352 504 C364 512 374 498 364 492"/></g>`,
+  earth: c => `<g fill="${c.t3}" opacity=".85"><path d="M120 514 C128 498 142 492 152 494 C146 508 134 516 120 514Z"/><path d="M280 514 C272 498 258 492 248 494 C254 508 266 516 280 514Z"/></g>`
+};
+function star4(x, y, r, fill){ const k = r * .26; return `<path d="M${x} ${y-r} L${x+k} ${y-k} L${x+r} ${y} L${x+k} ${y+k} L${x} ${y+r} L${x-k} ${y+k} L${x-r} ${y} L${x-k} ${y-k}Z" fill="${fill}"/>`; }
+function cardFrame(key, p){
+  const c = CARD[key], m = MOTIF[key];
+  const corner = tr => `<g transform="${tr}"><path d="${m[0]}" fill="${c.t1}"/><path d="${m[1]}" fill="${c.t2}"/><path d="${m[2]}" fill="${c.t3}"/></g>`;
+  let rays = "", brays = "";
+  for (let i = 0; i < 32; i++){ const a = i / 32 * Math.PI * 2, r2 = i % 2 ? 80 : 96;
+    rays += `<line x1="${(200 + Math.cos(a)*66).toFixed(1)}" y1="${(100 + Math.sin(a)*66).toFixed(1)}" x2="${(200 + Math.cos(a)*r2).toFixed(1)}" y2="${(100 + Math.sin(a)*r2).toFixed(1)}"/>`; }
+  for (let i = 0; i < 16; i++){ const a = i / 16 * Math.PI * 2, r2 = i % 2 ? 26 : 34;
+    brays += `<line x1="${(200 + Math.cos(a)*18).toFixed(1)}" y1="${(556 + Math.sin(a)*18).toFixed(1)}" x2="${(200 + Math.cos(a)*r2).toFixed(1)}" y2="${(556 + Math.sin(a)*r2).toFixed(1)}"/>`; }
+  const ic = icon(key, "#fff6dc", c.t2).replace(/<svg[^>]*>/, "").replace("</svg>", "").replace(/ig[a-z]+[a-z0-9]{0,4}(?=[")])/g, p + "ic");
+  const sparkles = [[44,52,13],[356,52,13],[66,250,7],[338,236,8],[30,330,5],[372,340,5],[372,566,11],[28,572,9],[112,38,4],[290,36,4],[150,84,3],[252,80,3]]
+    .map(([x,y,r]) => star4(x, y, r, "#fff3dc")).join("");
+  const dots = Array.from({length:24}, (_, i) => `<circle cx="${20 + ((i * 97) % 360)}" cy="${20 + ((i * 53) % 190)}" r="${(i % 3) * .5 + .6}" fill="#ffe9c8" opacity=".55"/>`).join("");
+  return `<svg class="frame" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <defs>
+    <linearGradient id="${p}bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c.bg1}"/><stop offset=".55" stop-color="${c.bg2}"/><stop offset="1" stop-color="${c.bg1}"/></linearGradient>
+    <radialGradient id="${p}orb" cx=".5" cy=".55" r=".6"><stop offset="0" stop-color="${c.glow}" stop-opacity=".9"/><stop offset=".45" stop-color="${c.t1}"/><stop offset="1" stop-color="${c.bg1}"/></radialGradient>
+    <linearGradient id="${p}paper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fdf3e4"/><stop offset="1" stop-color="#f7e3cc"/></linearGradient>
+    <linearGradient id="${p}rib" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff8ec"/><stop offset="1" stop-color="#f3dfc4"/></linearGradient>
+    <filter id="${p}tex" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="3"/><feColorMatrix values="0 0 0 0 .55  0 0 0 0 .38  0 0 0 0 .2  0 0 0 .08 0"/></filter>
+    <linearGradient id="${p}fadeG" x1="0" y1="0" x2="0" y2="1"><stop offset=".45" stop-color="#fff"/><stop offset=".95" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <mask id="${p}fade" maskUnits="userSpaceOnUse" x="0" y="0" width="400" height="320"><rect width="400" height="320" fill="url(#${p}fadeG)"/></mask>
+    <radialGradient id="${p}halo" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="${c.glow}" stop-opacity=".45"/><stop offset="1" stop-color="${c.glow}" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="400" height="600" fill="url(#${p}bg)"/>
+  ${dots}
+  <circle cx="200" cy="100" r="124" fill="url(#${p}halo)"/>
+  <g mask="url(#${p}fade)">${corner("translate(0 -290)")}${corner("translate(400 -290) scale(-1 1)")}</g>
+  <g stroke="${c.glow}" stroke-opacity=".55" stroke-width="1.2">${rays}</g>
+  <circle cx="200" cy="100" r="60" fill="url(#${p}orb)" stroke="#ffe7c4" stroke-width="2"/>
+  <circle cx="200" cy="100" r="54" fill="none" stroke="#ffe7c4" stroke-opacity=".45" stroke-width="1"/>
+  <g transform="translate(166 66) scale(.68)">${ic}</g>
+  ${star4(200, 24, 18, "#fff3dc")}
+  <path d="M42 214 Q42 198 58 198 H342 Q358 198 358 214 V542 Q358 560 340 560 H60 Q42 560 42 542 Z" fill="url(#${p}paper)"/>
+  <rect x="42" y="198" width="316" height="362" rx="16" filter="url(#${p}tex)"/>
+  <path d="M54 222 Q54 210 66 210 H334 Q346 210 346 222 V536 Q346 548 334 548 H66 Q54 548 54 536 Z" fill="none" stroke="${c.line}" stroke-width="1.2" opacity=".75"/>
+  ${star4(54, 262, 8, c.line)}${star4(346, 262, 8, c.line)}${star4(54, 420, 6, c.line)}${star4(346, 420, 6, c.line)}
+  <g fill="${c.line}" opacity=".7"><circle cx="54" cy="290" r="1.6"/><circle cx="346" cy="290" r="1.6"/><circle cx="54" cy="392" r="1.6"/><circle cx="346" cy="392" r="1.6"/></g>
+  <path d="M84 170 L40 176 L58 196 L44 216 L96 212 Z" fill="#ecd3b2" stroke="${c.line}" stroke-width="1.4" stroke-linejoin="round"/>
+  <path d="M316 170 L360 176 L342 196 L356 216 L304 212 Z" fill="#ecd3b2" stroke="${c.line}" stroke-width="1.4" stroke-linejoin="round"/>
+  <path d="M84 170 L96 186 L96 212 Z M316 170 L304 186 L304 212 Z" fill="#d9b88e"/>
+  <path d="M84 162 Q200 144 316 162 L316 204 Q200 186 84 204 Z" fill="url(#${p}rib)" stroke="${c.line}" stroke-width="1.6" stroke-linejoin="round"/>
+  <path d="M92 170 Q200 153 308 170 M92 196 Q200 179 308 196" fill="none" stroke="${c.line}" stroke-width=".8" opacity=".6"/>
+  ${star4(104, 183, 7, c.line)}${star4(296, 183, 7, c.line)}
+  ${corner("translate(0 90) scale(.85)")}${corner("translate(400 90) scale(-.85 .85)")}
+  ${EXTRA[key](c)}
+  <g stroke="${c.glow}" stroke-opacity=".8" stroke-width="1.2">${brays}</g>
+  <g fill="#fdf0de" stroke="${c.line}" stroke-width="1.2"><path d="M164 540 a22 22 0 1 0 20 34 a17 17 0 1 1 -20 -34Z"/><path d="M236 540 a22 22 0 1 1 -20 34 a17 17 0 1 0 20 -34Z"/></g>
+  <circle cx="200" cy="556" r="17" fill="${c.t1}" stroke="#ffe7c4" stroke-width="1.6"/>
+  ${star4(200, 556, 22, "#fff3dc")}
+  ${sparkles}
+  <rect x="9" y="9" width="382" height="582" rx="16" fill="none" stroke="#ffe7c4" stroke-opacity=".75" stroke-width="1.6"/>
+</svg>`;
+}
+
+/* ============ เสียง ============ */
+let ac = null, muted = false;
+function audio(){ if (muted) return null; try{ ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === "suspended") ac.resume(); return ac; }catch(e){ return null; } }
+function clack(freq = 2400, dur = .03, vol = .3){
+  const a = audio(); if (!a) return;
+  try{
+    const len = Math.floor(a.sampleRate * dur), buf = a.createBuffer(1, len, a.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random()*2 - 1) * Math.pow(1 - i/len, 3);
+    const s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
+    f.type = "bandpass"; f.frequency.value = freq; f.Q.value = 5; g.gain.value = vol;
+    s.buffer = buf; s.connect(f).connect(g).connect(a.destination); s.start();
+  }catch(e){}
+}
+function chime(){
+  const a = audio(); if (!a) return;
+  try{ [784, 988, 1319].forEach((fr, i) => { const o = a.createOscillator(), g = a.createGain(); o.type = "triangle"; o.frequency.value = fr;
+    const t = a.currentTime + i * .09; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.18, t + .02); g.gain.exponentialRampToValueAtTime(.001, t + .5);
+    o.connect(g).connect(a.destination); o.start(t); o.stop(t + .55); }); }catch(e){}
+}
+$("mute").addEventListener("click", e => { muted = !muted; e.currentTarget.textContent = muted ? "เสียง ปิด" : "เสียง เปิด"; e.currentTarget.setAttribute("aria-pressed", muted); });
+
+/* ============ พื้นหลังประจำธาตุ ============
+   เพิ่มภาพของธาตุอื่นได้ที่นี่ ธาตุที่ยังไม่มีภาพจะใช้พื้นหลังรวมสี่ธาตุ */
+const BG = {
+  all:   { full:"bg-full.jpg",       color:"#fbf0e4" },
+  earth: { full:"bg-earth-full.jpg", color:"#f6ebe2" }
+};
+let bgNow = "all";
+function preloadBg(key){ const b = BG[key]; if (!b) return; const i = new Image(); i.src = b.full; }
+function setBg(key){
+  key = BG[key] ? key : "all";
+  if (key === bgNow) return;
+  bgNow = key;
+  const b = BG[key], el = document.querySelector(".bg");
+  el.classList.add("swap");
+  setTimeout(() => {
+    el.style.backgroundColor = b.color;
+    el.querySelector(".bg-full").style.backgroundImage = `url("${b.full}")`;
+    document.body.style.background = b.color;
+    el.classList.remove("swap");
+  }, REDUCE ? 0 : 350);
+}
+
+/* ============ สถานะและการเปลี่ยนหน้า ============ */
+const SCREENS = ["home","month","element","shake","slip"];
+const state = { screen:"home", month:null, element:null, result:null, flipped:false };
+let busy = false;
+
+function go(name){
+  state.screen = name;
+  SCREENS.forEach(s => $("s-" + s).classList.toggle("active", s === name));
+  document.querySelectorAll(".steps i").forEach((d, i) => d.classList.toggle("on", i <= SCREENS.indexOf(name)));
+  setBg(["element","shake","slip"].includes(name) ? state.element : "all");
+  if (name === "home" || name === "month") setTheme(...HOME_THEME);
+  else if (state.element){ const e = ELEMENTS[state.element]; setTheme(e.c, e.light, e.dark); }
+  window.scrollTo({ top:0, behavior: REDUCE ? "auto" : "smooth" });
+  const h = document.querySelector("#s-" + name + " [tabindex='-1']"); if (h) h.focus({ preventScroll:true });
+}
+async function loading(text, ms = 750){
+  $("loaderText").textContent = text; $("loader").classList.add("show");
+  await wait(REDUCE ? 150 : ms); $("loader").classList.remove("show");
+}
+
+/* หน้า 1 */
+$("heroCup").innerHTML = `<div class="cupwrap">${cupSVG("h","เซียมซี")}</div>`;
+$("startBtn").addEventListener("click", () => { audio(); chime(); go("month"); });
+$("brand").addEventListener("click", () => { if (!busy) restart(); });
+
+/* หน้า 2 */
+MONTHS.forEach((m, i) => {
+  const b = document.createElement("button");
+  b.className = "month"; b.id = "month-" + (i + 1);
+  b.innerHTML = `<b>${m}</b><span>เดือนที่ ${thaiNum(i + 1)}</span>`;
+  b.addEventListener("click", () => pickMonth(i, b));
+  $("months").appendChild(b);
+});
+async function pickMonth(i, btn){
+  if (busy) return; busy = true;
+  const key = elementOfMonth(i), e = ELEMENTS[key];
+  state.month = i; state.element = key; state.result = null;
+  preloadBg(key);
+  document.querySelectorAll(".month").forEach(x => x.classList.remove("picked"));
+  btn.style.setProperty("--mc", e.c); btn.style.setProperty("--mcd", e.dark); btn.classList.add("picked");
+  $("pickedNote").textContent = `เกิดเดือน${MONTHS[i]} คือ ธาตุ${e.name}`;
+  clack(1400, .05, .4);
+  await wait(REDUCE ? 100 : 750);
+  renderElement(); go("element"); busy = false;
+}
+
+/* หน้า 3 */
+function renderElement(){
+  const e = ELEMENTS[state.element];
+  $("elIcon").innerHTML = icon(state.element);
+  $("h-element").textContent = "ธาตุ" + e.name;
+  $("elKicker").textContent = `เกิดเดือน${MONTHS[state.month]} ธาตุเจ้าเรือนของคุณคือ`;
+  $("elInfo").innerHTML = [
+    ["เดือนเกิด", e.months],
+    ["สีกระบอก", `<span class="swatch"></span>${e.cupColor}`],
+    ["รสที่ช่วยปรับสมดุล", e.taste],
+    ["บุคลิก", e.trait],
+    ["สิ่งที่ควรระวัง", e.caution],
+    ["กลิ่นประจำธาตุ", SCENT_THEME[state.element]]
+  ].map(([k, v]) => `<li><b>${k}</b><span>${v}</span></li>`).join("");
+}
+$("toShakeBtn").addEventListener("click", async () => { if (busy) return; busy = true; await loading("กำลังเตรียมกระบอกเซียมซี..."); setupCup(); go("shake"); busy = false; });
+$("elBackBtn").addEventListener("click", () => go("month"));
+
+/* หน้า 4: ระบบเขย่า */
+let stickEls = [];
+function setupCup(){
+  const e = ELEMENTS[state.element];
+  $("h-shake").textContent = "ธาตุ" + e.name;
+  $("shakeCup").innerHTML = cupSVG("s", "ธาตุ" + e.name);
+  stickEls = [...$("shakeCup").querySelectorAll(".stick")].map(g => ({ g, m: g.querySelector(".stick-move"), f: .018 + Math.random()*.012, p: Math.random()*6.28, a: .7 + Math.random()*.6 }));
+  document.querySelectorAll(".flying,.spark").forEach(x => x.remove());
+  $("shakeCup").style.transform = ""; 
+  $("resultBadge").classList.remove("show"); $("resultBadge").textContent = "";
+  $("openSlipBtn").hidden = true; $("shakeBtn").hidden = false; $("shakeBtn").disabled = false;
+  $("prayer").textContent = "ตั้งจิตอธิษฐาน\nแล้วเขย่ากระบอกเซียมซี";
+  $("subHint").textContent = "กดปุ่ม หรือแตะ/ปัดที่กระบอกก็ได้";
+  state.result = null; state.flipped = false;
+}
+function animate(ms, fn){
+  return new Promise(res => {
+    const t0 = performance.now();
+    const step = now => { const t = Math.min(1, (now - t0) / ms); fn(t, now - t0); t < 1 ? requestAnimationFrame(step) : res(); };
+    requestAnimationFrame(step);
+  });
+}
+const easeOut = t => 1 - Math.pow(1 - t, 3);
+
+async function shake(){
+  if (busy || state.result || state.screen !== "shake") return;
+  busy = true; audio();
+  $("shakeBtn").disabled = true;
+  const no = randInt(7) + 1;                 /* ผลสุ่มเลือกไว้ก่อน ไม่ขึ้นกับการเขย่า */
+  state.result = { element: state.element, no };
+  const cup = $("shakeCup");
+    $("prayer").textContent = "กำลังเขย่า...";
+  $("subHint").textContent = "ตั้งใจอธิษฐานไว้";
+
+  /* 1) เขย่าซ้ายขวา ไม้กระทบกัน */
+  if (!REDUCE){
+    await animate(2000, (t, ms) => {
+      const env = Math.pow(Math.sin(Math.PI * t), .6);
+      const ang = Math.sin(ms / 1000 * Math.PI * 2 * 3.6) * 14 * env;
+      cup.style.transform = `translateX(${ang * .9}px) rotate(${ang}deg)`;
+      stickEls.forEach(s => {
+        const y = -Math.abs(Math.sin(ms * s.f + s.p)) * 16 * env * s.a;
+        const r = Math.sin(ms * s.f * 1.4 + s.p) * 4 * env;
+        s.m.style.transform = `translateY(${y}px) rotate(${r}deg)`;
+      });
+      if (Math.random() < .5 * env) clack(1700 + Math.random()*1800, .025, .18 + Math.random()*.22);
+    });
+  }
+  cup.style.transform = ""; stickEls.forEach(s => s.m.style.transform = "");
+  
+  /* 2) ไม้หนึ่งไม้ค่อยๆ เลื่อนออกจากปากกระบอก */
+  const chosen = stickEls[no - 1];
+  $("prayer").textContent = "ไม้เซียมซีกำลังออกมา...";
+  if (!REDUCE){
+    await animate(1100, t => {
+      const k = easeOut(t);
+      chosen.m.style.transform = `translateY(${-118 * k}px) rotate(${Math.sin(t * 12) * 2 * (1 - t)}deg)`;
+      cup.style.transform = `rotate(${8 * k}deg)`;
+      if (Math.random() < .08) clack(2600, .02, .12);
+    });
+  }
+
+  /* 3) ไม้ตกลงด้านหน้ากระบอก */
+  const stage = $("stage"), sr = stage.getBoundingClientRect(), svgR = cup.querySelector("svg").getBoundingClientRect();
+  const scale = svgR.width / 260, rr = chosen.m.getBoundingClientRect();
+  const len = (250 - STICK_TOPS[no - 1]) * scale, wid = 22 * scale;
+  const cx = rr.left + rr.width/2 - sr.left, cy = rr.top + rr.height/2 - sr.top;
+  const fly = document.createElement("div");
+  fly.className = "flying";
+  fly.style.cssText = `width:${wid}px;height:${len}px;left:${cx - wid/2}px;top:${cy - len/2}px`;
+  fly.style.setProperty("--tip", (12 / (250 - STICK_TOPS[no - 1]) * 100) + "%");
+  fly.innerHTML = `<span style="font-size:${19*scale/sr.width*100}cqw;top:${58 / (250 - STICK_TOPS[no - 1]) * 100}%">${no}</span>`;
+  stage.appendChild(fly);
+  chosen.g.style.visibility = "hidden";
+  const startRot = +stickAngle(stickX(no - 1)) + 8;
+  const tx = sr.width * .5 - cx + sr.width * .04, ty = sr.height * .93 - cy;
+  if (!REDUCE && fly.animate){
+    const a = fly.animate([
+      { transform:`translate(0,0) rotate(${startRot}deg)` },
+      { transform:`translate(${tx * .55}px,${-sr.height * .12}px) rotate(${startRot + 60}deg)`, offset:.35 },
+      { transform:`translate(${tx}px,${ty}px) rotate(84deg)`, offset:.78 },
+      { transform:`translate(${tx}px,${ty - 16}px) rotate(78deg)`, offset:.88 },
+      { transform:`translate(${tx}px,${ty}px) rotate(82deg)` }
+    ], { duration:1150, easing:"cubic-bezier(.35,.05,.55,1)", fill:"forwards" });
+    setTimeout(() => clack(500, .07, .6), 900);
+    setTimeout(() => clack(650, .05, .4), 1080);
+    await a.finished.catch(() => {});
+  }
+  /* ตรึงตำแหน่งไม้ที่ตกเป็น % ของเวที ไม่ให้เลื่อนเมื่อหมุนจอหรือย่อขยายหน้าต่าง */
+  const fx = cx + tx, fy = cy + ty;
+  fly.getAnimations && fly.getAnimations().forEach(an => an.cancel());
+  fly.style.left = ((fx - wid/2) / sr.width * 100) + "%";
+  fly.style.top = ((fy - len/2) / sr.height * 100) + "%";
+  fly.style.width = (wid / sr.width * 100) + "%";
+  fly.style.height = (len / sr.height * 100) + "%";
+  fly.style.transform = "rotate(82deg)";
+  cup.style.transition = "transform .4s"; cup.style.transform = "";
+  setTimeout(() => cup.style.transition = "", 450);
+
+  /* 4) เปิดเผยหมายเลข */
+  chime(); sparkle(stage, cx + tx, cy + ty);
+  $("resultBadge").textContent = `ได้เซียมซีใบที่ ${thaiNum(no)} (${no})`;
+  $("resultBadge").classList.add("show");
+  $("prayer").textContent = "เสี่ยงได้แล้ว!";
+  $("subHint").textContent = "กดปุ่มด้านล่างเพื่อเปิดอ่านคำทำนาย";
+  $("shakeBtn").hidden = true; $("openSlipBtn").hidden = false; $("openSlipBtn").focus();
+  busy = false;
+}
+function sparkle(stage, x, y){
+  if (REDUCE) return;
+  const cols = ["#c9a24a", "#e8cf8a", ELEMENTS[state.element].c, "#fff"];
+  for (let i = 0; i < 12; i++){
+    const s = document.createElement("i"); s.className = "spark";
+    s.style.cssText = `left:${x}px;top:${y}px;background:${cols[i % 4]}`;
+    stage.appendChild(s);
+    const ang = Math.random() * Math.PI * 2, d = 50 + Math.random() * 70;
+    s.animate([{ transform:"translate(-50%,-50%) scale(1) rotate(0)", opacity:1 },
+               { transform:`translate(${Math.cos(ang)*d}px,${Math.sin(ang)*d - 30}px) scale(.3) rotate(${Math.random()*360}deg)`, opacity:0 }],
+              { duration:800 + Math.random()*400, easing:"cubic-bezier(.2,.8,.4,1)", fill:"forwards" }).onfinish = () => s.remove();
+  }
+}
+$("shakeBtn").addEventListener("click", shake);
+const cupEl = $("shakeCup");
+let swipeY = null;
+cupEl.addEventListener("pointerdown", e => { swipeY = e.clientY; });
+cupEl.addEventListener("pointermove", e => { if (swipeY !== null && Math.abs(e.clientY - swipeY) > 12){ swipeY = null; shake(); } });
+cupEl.addEventListener("pointerup", () => { if (swipeY !== null) shake(); swipeY = null; });
+cupEl.addEventListener("pointercancel", () => { swipeY = null; });
+cupEl.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); shake(); } });
+
+
+
+/* หน้า 5: ใบเซียมซี */
+function renderSlip(){
+  const r = state.result; if (!r) return;
+  const e = ELEMENTS[r.element], f = FORTUNES[r.element].find(x => x.no === r.no);
+  setTheme(e.c, e.light, e.dark);
+  $("card").style.setProperty("--line", CARD[r.element].line);
+  $("frameF").outerHTML = cardFrame(r.element, "cf").replace('class="frame"', 'class="frame" id="frameF"');
+  $("frameB").outerHTML = cardFrame(r.element, "cb").replace('class="frame"', 'class="frame" id="frameB"');
+  $("fEl").textContent = "ธาตุ" + e.name;
+  $("fNum").textContent = thaiNum(f.no); $("fNumAr").textContent = f.no;
+  $("fVerse").textContent = f.verse;
+  $("bTitle").textContent = `ธาตุ${e.name} · ใบที่ ${thaiNum(f.no)}`;
+  $("bMeaning").textContent = f.meaning; $("bCaution").textContent = f.caution; $("bMenu").textContent = f.menu;
+  $("bScent").textContent = scentText(r.element, f.no);
+  $("copied").textContent = "";
+  setFlip(state.flipped);
+}
+function setFlip(v){
+  state.flipped = v; $("card").classList.toggle("flipped", v);
+  $("flipBtn").textContent = v ? "ดูด้านหน้า" : "พลิกอ่านความหมาย";
+  if (v) clack(900, .05, .25);
+}
+$("openSlipBtn").addEventListener("click", async () => {
+  if (busy) return; busy = true;
+  await loading("กำลังคลี่ใบเซียมซี...", 600);
+  state.flipped = false; renderSlip(); go("slip");
+  const c = $("card"); c.classList.remove("unfold"); void c.offsetWidth; c.classList.add("unfold");
+  busy = false;
+});
+$("cardInner").addEventListener("click", () => setFlip(!state.flipped));
+$("cardInner").addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); setFlip(!state.flipped); } });
+$("flipBtn").addEventListener("click", () => setFlip(!state.flipped));
+$("copyBtn").addEventListener("click", async () => {
+  const r = state.result; if (!r) return;
+  const e = ELEMENTS[r.element], f = FORTUNES[r.element].find(x => x.no === r.no);
+  const txt = `เซียมซีธาตุ${e.name} ใบที่ ${f.no}\n${f.verse}\nความหมาย: ${f.meaning}\nข้อควรระวัง: ${f.caution}\nเมนูแนะนำ: ${f.menu}\nเครื่องหอมประจำใบ: ${scentText(r.element, f.no)}\n\n${DISCLAIMER}`;
+  try{ await navigator.clipboard.writeText(txt); $("copied").textContent = "คัดลอกคำทำนายแล้ว"; }
+  catch(err){ $("copied").textContent = "คัดลอกไม่ได้ ลองกดค้างที่ข้อความเพื่อคัดลอกเอง"; }
+});
+$("againBtn").addEventListener("click", async () => { if (busy) return; busy = true; await loading("กำลังเตรียมกระบอกเซียมซี...", 500); setupCup(); go("shake"); busy = false; });
+$("toMonthBtn").addEventListener("click", () => { state.result = null; document.querySelectorAll(".month").forEach(x => x.classList.remove("picked")); $("pickedNote").textContent = ""; go("month"); });
+$("restartBtn").addEventListener("click", restart);
+function restart(){
+  Object.assign(state, { month:null, element:null, result:null, flipped:false });
+  document.querySelectorAll(".month").forEach(x => x.classList.remove("picked")); $("pickedNote").textContent = "";
+  go("home");
+}
+
+/* ============ เก็บตำแหน่งเมื่อมีการอัปเดตหน้า ============ */
+try{ window.claude?.hot?.snapshot(() => ({ screen:state.screen, month:state.month, element:state.element, result:state.result, flipped:state.flipped })); }catch(e){}
+function start(data){
+  if (data && data.element && ELEMENTS[data.element]){
+    state.month = data.month; state.element = data.element; renderElement();
+    if (data.screen === "slip" && data.result){ state.result = data.result; state.flipped = !!data.flipped; renderSlip(); go("slip"); return; }
+    if (data.screen === "shake"){ setupCup(); go("shake"); return; }
+    if (data.screen === "element"){ go("element"); return; }
+  }
+  go(data && data.screen === "month" ? "month" : "home");
+}
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>
+</body>
+</html>
