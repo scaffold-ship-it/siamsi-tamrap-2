@@ -24,6 +24,10 @@
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
+/* the page scrolls inside .app, not the document: Safari's toolbar then never collapses/expands while scrolling,
+   so the viewport (and the fixed painted background behind it) stays perfectly still */
+html,body{overflow:hidden;overscroll-behavior:none}
+.app{position:fixed;inset:0;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 body{
   font-family:var(--body);color:var(--ink);font-size:16px;line-height:1.6;
   background:#fbf0e4;
@@ -171,7 +175,7 @@ h2{font-size:clamp(26px,6.5vw,36px);line-height:1.25}
 .disclaimer{max-width:440px;margin:16px auto 0;text-align:center;font-size:13px;color:var(--muted)}
 .copied{text-align:center;font-size:14px;color:var(--c-dark);min-height:1.4em;margin:8px 0 0}
 /* slip buttons: tidy, equal-width grid; soft buttons get a solid backing over the painted scene */
-#s-slip .btn.soft{background:rgba(255,250,243,.88);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+#s-slip .btn.soft{background:rgba(255,250,243,.92)}
 #s-slip .btn.soft:hover{background:#fffaf3}
 /* same stacked layout on phone, tablet and TV: buttons match the card's width */
 #s-slip .slip-nav{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:400px;margin-left:auto;margin-right:auto}
@@ -208,6 +212,7 @@ h2{font-size:clamp(26px,6.5vw,36px);line-height:1.25}
 <div class="bg" aria-hidden="true">
   <div class="bg-full"></div>
 </div>
+<div class="app" id="app">
 <header class="bar">
   <button class="brand" id="brand" aria-label="กลับหน้าแรก">
     <svg viewBox="0 0 40 40" aria-hidden="true"><g fill="#f2607a"><path d="M20 4 Q27 13 20 20 Q13 13 20 4Z"/><path d="M36 20 Q27 27 20 20 Q27 13 36 20Z"/><path d="M20 36 Q13 27 20 20 Q27 27 20 36Z"/><path d="M4 20 Q13 13 20 20 Q13 27 4 20Z"/></g><circle cx="20" cy="20" r="3" fill="#f3b443"/></svg>
@@ -315,6 +320,7 @@ h2{font-size:clamp(26px,6.5vw,36px);line-height:1.25}
     <p class="disclaimer">เพื่อความรู้และความบันเทิงตามความเชื่อแพทย์แผนไทย ไม่ใช่การวินิจฉัยโรค หากมีอาการผิดปกติควรปรึกษาแพทย์</p>
   </section>
 </main>
+</div>
 
 <div class="loader" id="loader" aria-hidden="true"><div class="loader-in"><div class="dots"><i></i><i></i><i></i><i></i></div><span id="loaderText">กำลังเตรียมกระบอกเซียมซี...</span></div></div>
 
@@ -665,7 +671,7 @@ function go(name){
   setBg(["element","shake","slip"].includes(name) ? state.element : "all");
   if (name === "home" || name === "month") setTheme(...HOME_THEME);
   else if (state.element){ const e = ELEMENTS[state.element]; setTheme(e.c, e.light, e.dark); }
-  window.scrollTo({ top:0, behavior: REDUCE ? "auto" : "smooth" });
+  $("app").scrollTo({ top:0, behavior: REDUCE ? "auto" : "smooth" });
   const h = document.querySelector("#s-" + name + " [tabindex='-1']"); if (h) h.focus({ preventScroll:true });
 }
 async function loading(text, ms = 750){
