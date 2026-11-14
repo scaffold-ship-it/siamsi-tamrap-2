@@ -34,12 +34,12 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--gold);outl
 [tabindex="-1"]:focus,[tabindex="-1"]:focus-visible{outline:none}
 
 /* background: Pam's painted four-element scene */
-.bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;background:#fbf0e4}
-.bg-full{position:absolute;inset:0;background:url("bg-full.jpg") center top/cover no-repeat}
+/* fixed to the *large* viewport so it never resizes/zooms when the mobile browser bar shows or hides */
+.bg{position:fixed;top:0;left:0;width:100%;height:100vh;height:100lvh;z-index:-1;overflow:hidden;pointer-events:none;background:#fbf0e4;
+  transform:translateZ(0);-webkit-backface-visibility:hidden;backface-visibility:hidden;transition:background-color .6s}
+.bg-full{position:absolute;inset:0;background:url("bg-full.jpg") center top/cover no-repeat;will-change:opacity;transition:opacity .5s ease}
 @media (max-aspect-ratio:1/1){.bg-full{background-position:center center}}
-.bg{transition:background-color .6s}
-.bg > *{transition:opacity .35s ease}
-.bg.swap > *{opacity:0}
+.bg-full.fade-in{opacity:0}
 
 
 /* keep small text readable over the painted scene */
@@ -613,19 +613,31 @@ const BG = {
 };
 let bgNow = "all";
 function preloadBg(key){ const b = BG[key]; if (!b) return; const i = new Image(); i.src = b.full; }
+const bgCache = {};
+function loadImg(src){
+  return bgCache[src] || (bgCache[src] = new Promise(res => { const i = new Image(); i.onload = i.onerror = () => (i.decode ? i.decode().catch(()=>{}) : Promise.resolve()).then(res); i.src = src; }));
+}
 function setBg(key){
   key = BG[key] ? key : "all";
   if (key === bgNow) return;
   bgNow = key;
   const b = BG[key], el = document.querySelector(".bg");
-  el.classList.add("swap");
-  setTimeout(() => {
+  /* crossfade: wait until the new image is decoded, lay it on top, fade it in, then drop the old layer */
+  loadImg(b.full).then(() => {
+    if (bgNow !== key) return;
     el.style.backgroundColor = b.color;
-    el.querySelector(".bg-full").style.backgroundImage = `url("${b.full}")`;
     document.body.style.background = b.color;
-    el.classList.remove("swap");
-  }, REDUCE ? 0 : 350);
+    const old = [...el.querySelectorAll(".bg-full")];
+    const layer = document.createElement("div");
+    layer.className = "bg-full fade-in";
+    layer.style.backgroundImage = `url("${b.full}")`;
+    el.appendChild(layer);
+    requestAnimationFrame(() => requestAnimationFrame(() => layer.classList.remove("fade-in")));
+    setTimeout(() => old.forEach(x => x.remove()), REDUCE ? 0 : 550);
+  });
 }
+/* preload every background so switching elements never shows a blank frame */
+addEventListener("load", () => Object.values(BG).forEach(b => loadImg(b.full)));
 
 /* ============ สถานะและการเปลี่ยนหน้า ============ */
 const SCREENS = ["home","month","element","shake","slip"];
