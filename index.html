@@ -27,6 +27,8 @@ html,body{height:100%;margin:0}
 /* the page scrolls inside .app, not the document: Safari's toolbar then never collapses/expands while scrolling,
    so the viewport (and the fixed painted background behind it) stays perfectly still */
 html,body{overflow:hidden;overscroll-behavior:none}
+/* pin the document itself: iOS can otherwise still rubber-band / shift the whole page (and the background with it) */
+body{position:fixed;top:0;left:0;right:0;bottom:0;width:100%;touch-action:pan-y}
 .app{position:fixed;inset:0;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 body{
   font-family:var(--body);color:var(--ink);font-size:16px;line-height:1.6;
