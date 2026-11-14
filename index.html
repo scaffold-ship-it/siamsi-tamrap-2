@@ -61,8 +61,8 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--gold);outl
 
 main{max-width:960px;margin:0 auto;padding:12px 16px 48px;overflow-x:clip}
 .screen{display:none}
-.screen.active{display:block;animation:enter .45s cubic-bezier(.2,.9,.3,1.1)}
-@keyframes enter{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
+.screen.active{display:block;animation:enter .35s ease-out}
+@keyframes enter{from{opacity:0}to{opacity:1}}
 
 h1,h2{font-family:var(--display);font-weight:700;text-wrap:balance;margin:0}
 h1{font-size:clamp(32px,8.5vw,52px);line-height:1.25;color:var(--c-dark);letter-spacing:.01em}
@@ -666,12 +666,13 @@ let busy = false;
 
 function go(name){
   state.screen = name;
+  /* jump to the top before the new screen appears — a smooth scroll running while the screen fades in looked like shaking/zooming on phones */
+  $("app").scrollTop = 0;
   SCREENS.forEach(s => $("s-" + s).classList.toggle("active", s === name));
   document.querySelectorAll(".steps i").forEach((d, i) => d.classList.toggle("on", i <= SCREENS.indexOf(name)));
   setBg(["element","shake","slip"].includes(name) ? state.element : "all");
   if (name === "home" || name === "month") setTheme(...HOME_THEME);
   else if (state.element){ const e = ELEMENTS[state.element]; setTheme(e.c, e.light, e.dark); }
-  $("app").scrollTo({ top:0, behavior: REDUCE ? "auto" : "smooth" });
   const h = document.querySelector("#s-" + name + " [tabindex='-1']"); if (h) h.focus({ preventScroll:true });
 }
 async function loading(text, ms = 750){
