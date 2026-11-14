@@ -688,7 +688,7 @@ function renderElement(){
     ["กลิ่นประจำธาตุ", SCENT_THEME[state.element]]
   ].map(([k, v]) => `<li><b>${k}</b><span>${v}</span></li>`).join("");
 }
-$("toShakeBtn").addEventListener("click", async () => { if (busy) return; busy = true; await loading("กำลังเตรียมกระบอกเซียมซี..."); setupCup(); go("shake"); busy = false; });
+$("toShakeBtn").addEventListener("click", async () => { askMotion(); if (busy) return; busy = true; await loading("กำลังเตรียมกระบอกเซียมซี..."); setupCup(); go("shake"); busy = false; });
 $("elBackBtn").addEventListener("click", () => go("month"));
 
 /* หน้า 4: ระบบเขย่า */
@@ -703,7 +703,7 @@ function setupCup(){
   $("resultBadge").classList.remove("show"); $("resultBadge").textContent = "";
   $("openSlipBtn").hidden = true; $("shakeBtn").hidden = false; $("shakeBtn").disabled = false;
   $("prayer").textContent = "ตั้งจิตอธิษฐาน\nแล้วเขย่ากระบอกเซียมซี";
-  $("subHint").textContent = "กดปุ่ม หรือแตะ/ปัดที่กระบอกก็ได้";
+  $("subHint").textContent = hintText();
   state.result = null; state.flipped = false;
 }
 function animate(ms, fn){
@@ -813,6 +813,32 @@ function sparkle(stage, x, y){
   }
 }
 $("shakeBtn").addEventListener("click", shake);
+
+/* เขย่าโทรศัพท์เพื่อสุ่มเซียมซี (devicemotion) */
+let motionOn = false;
+const hintText = () => motionOn ? "เขย่าโทรศัพท์ กดปุ่ม หรือแตะ/ปัดที่กระบอกก็ได้" : "กดปุ่ม หรือแตะ/ปัดที่กระบอกก็ได้";
+function askMotion(){
+  /* iOS ต้องขออนุญาตจากการแตะของผู้ใช้ จึงเรียกตอนกดปุ่ม "ไปเสี่ยงเซียมซี" */
+  const DM = window.DeviceMotionEvent;
+  if (DM && typeof DM.requestPermission === "function"){
+    DM.requestPermission().then(r => { if (r === "granted") listenMotion(); }).catch(() => {});
+  } else if (DM) listenMotion();
+}
+let listening = false, lastAcc = null, jolts = [];
+function listenMotion(){
+  if (listening) return; listening = true;
+  window.addEventListener("devicemotion", e => {
+    const a = e.accelerationIncludingGravity; if (!a || a.x == null) return;
+    if (!motionOn){ motionOn = true; if (state.screen === "shake" && !state.result && !busy) $("subHint").textContent = hintText(); }
+    if (lastAcc){
+      const d = Math.abs(a.x - lastAcc.x) + Math.abs(a.y - lastAcc.y) + Math.abs(a.z - lastAcc.z);
+      const now = performance.now();
+      if (d > 22){ jolts = jolts.filter(t => now - t < 900); jolts.push(now);
+        if (jolts.length >= 3){ jolts = []; shake(); } }
+    }
+    lastAcc = { x:a.x, y:a.y, z:a.z };
+  });
+}
 const cupEl = $("shakeCup");
 let swipeY = null;
 cupEl.addEventListener("pointerdown", e => { swipeY = e.clientY; });
