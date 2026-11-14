@@ -35,7 +35,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--gold);outl
 
 /* background: Pam's painted four-element scene */
 /* fixed to the *large* viewport so it never resizes/zooms when the mobile browser bar shows or hides */
-.bg{position:fixed;top:0;left:0;width:100%;height:100vh;height:100lvh;z-index:-1;overflow:hidden;pointer-events:none;background:#fbf0e4;
+.bg{position:fixed;top:0;left:0;width:100%;height:100vh;height:100lvh;height:var(--bgh,100lvh);z-index:-1;overflow:hidden;pointer-events:none;background:#fbf0e4;
   transform:translateZ(0);-webkit-backface-visibility:hidden;backface-visibility:hidden;transition:background-color .6s}
 .bg-full{position:absolute;inset:0;background:url("bg-full.jpg") center top/cover no-repeat;will-change:opacity;transition:opacity .5s ease}
 @media (max-aspect-ratio:1/1){.bg-full{background-position:center center}}
@@ -638,6 +638,20 @@ function setBg(key){
 }
 /* preload every background so switching elements never shows a blank frame */
 addEventListener("load", () => Object.values(BG).forEach(b => loadImg(b.full)));
+/* lock the background to a fixed pixel height (taller than any viewport the browser bars can produce),
+   so the cover image never re-scales — i.e. never "zooms" — while scrolling on iOS/Android.
+   Only recompute when the width changes (rotation), never on toolbar show/hide. */
+(function lockBgHeight(){
+  let lastW = 0;
+  const set = () => {
+    const w = innerWidth; if (w === lastW) return; lastW = w;
+    const portrait = innerHeight >= w;
+    const sh = portrait ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
+    const h = Math.max(sh || 0, innerHeight, document.documentElement.clientHeight) + 120;
+    document.documentElement.style.setProperty("--bgh", h + "px");
+  };
+  set(); addEventListener("resize", set); addEventListener("orientationchange", () => { lastW = 0; setTimeout(set, 300); });
+})();
 
 /* ============ สถานะและการเปลี่ยนหน้า ============ */
 const SCREENS = ["home","month","element","shake","slip"];
