@@ -170,6 +170,25 @@ h2{font-size:clamp(26px,6.5vw,36px);line-height:1.25}
 @container (max-width:330px){.back .flip-hint{display:none}.back dl{gap:1.4cqw}.back dd{font-size:12px;line-height:1.45}.back dt{font-size:13px}.back .flip-hint{padding-top:1cqw}.verse{font-size:16.5px}}
 .disclaimer{max-width:440px;margin:16px auto 0;text-align:center;font-size:13px;color:var(--muted)}
 .copied{text-align:center;font-size:14px;color:var(--c-dark);min-height:1.4em;margin:8px 0 0}
+/* slip buttons: tidy, equal-width grid; soft buttons get a solid backing over the painted scene */
+#s-slip .btn.soft{background:rgba(255,250,243,.88);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+#s-slip .btn.soft:hover{background:#fffaf3}
+/* same stacked layout on phone, tablet and TV: buttons match the card's width */
+#s-slip .slip-nav{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:400px;margin-left:auto;margin-right:auto}
+#s-slip .slip-nav #againBtn{grid-column:1/-1}
+#s-slip .slip-nav .btn{width:100%;padding:13px 10px;font-size:16px;line-height:1.3}
+/* tablet */
+@media (min-width:641px){
+  #s-slip .card-stage,#s-slip .slip-nav{max-width:440px}
+  #s-slip .slip-nav{gap:12px}
+  #s-slip .slip-nav .btn{padding:15px 12px;font-size:17px}
+}
+/* large screens / TV: scale with the viewport height so the card and buttons fit on one screen */
+@media (min-width:1280px) and (min-height:700px){
+  #s-slip .card-stage,#s-slip .slip-nav{max-width:min(560px,calc((100vh - 340px) * 2 / 3))}
+  #s-slip .slip-nav{gap:14px}
+  #s-slip .slip-nav .btn{padding:16px 14px;font-size:clamp(17px,1.1vw,22px)}
+}
 
 /* loader */
 .loader{position:fixed;inset:0;z-index:9;display:none;place-items:center;background:rgba(251,246,239,.9);backdrop-filter:blur(4px)}
@@ -288,12 +307,7 @@ h2{font-size:clamp(26px,6.5vw,36px);line-height:1.25}
         </div>
       </div>
     </div>
-    <div class="actions" style="margin-top:18px">
-      <button class="btn soft" id="flipBtn">พลิกอ่านความหมาย</button>
-      <button class="btn soft" id="copyBtn">คัดลอกคำทำนาย</button>
-    </div>
-    <p class="copied" id="copied" aria-live="polite"></p>
-    <div class="actions" style="margin-top:6px">
+    <div class="actions slip-nav" style="margin-top:22px">
       <button class="btn" id="againBtn">เสี่ยงเซียมซีอีกครั้ง</button>
       <button class="btn gold" id="toMonthBtn">กลับไปเลือกเดือนเกิด</button>
       <button class="btn soft" id="restartBtn">เริ่มต้นใหม่</button>
@@ -823,12 +837,10 @@ function renderSlip(){
   $("bTitle").textContent = `ธาตุ${e.name} · ใบที่ ${thaiNum(f.no)}`;
   $("bMeaning").textContent = f.meaning; $("bCaution").textContent = f.caution; $("bMenu").textContent = f.menu;
   $("bScent").textContent = scentText(r.element, f.no);
-  $("copied").textContent = "";
   setFlip(state.flipped);
 }
 function setFlip(v){
   state.flipped = v; $("card").classList.toggle("flipped", v);
-  $("flipBtn").textContent = v ? "ดูด้านหน้า" : "พลิกอ่านความหมาย";
   if (v) clack(900, .05, .25);
 }
 $("openSlipBtn").addEventListener("click", async () => {
@@ -840,14 +852,6 @@ $("openSlipBtn").addEventListener("click", async () => {
 });
 $("cardInner").addEventListener("click", () => setFlip(!state.flipped));
 $("cardInner").addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); setFlip(!state.flipped); } });
-$("flipBtn").addEventListener("click", () => setFlip(!state.flipped));
-$("copyBtn").addEventListener("click", async () => {
-  const r = state.result; if (!r) return;
-  const e = ELEMENTS[r.element], f = FORTUNES[r.element].find(x => x.no === r.no);
-  const txt = `เซียมซีธาตุ${e.name} ใบที่ ${f.no}\n${f.verse}\nความหมาย: ${f.meaning}\nข้อควรระวัง: ${f.caution}\nเมนูแนะนำ: ${f.menu}\nเครื่องหอมประจำใบ: ${scentText(r.element, f.no)}\n\n${DISCLAIMER}`;
-  try{ await navigator.clipboard.writeText(txt); $("copied").textContent = "คัดลอกคำทำนายแล้ว"; }
-  catch(err){ $("copied").textContent = "คัดลอกไม่ได้ ลองกดค้างที่ข้อความเพื่อคัดลอกเอง"; }
-});
 $("againBtn").addEventListener("click", async () => { if (busy) return; busy = true; await loading("กำลังเตรียมกระบอกเซียมซี...", 500); setupCup(); go("shake"); busy = false; });
 $("toMonthBtn").addEventListener("click", () => { state.result = null; document.querySelectorAll(".month").forEach(x => x.classList.remove("picked")); $("pickedNote").textContent = ""; go("month"); });
 $("restartBtn").addEventListener("click", restart);
