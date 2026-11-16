@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>เซียมซีตำหรับเจ้าเรือน</title>
+<title>เซียมซีตำรับเจ้าเรือน</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
@@ -27,6 +27,8 @@ html,body{height:100%;margin:0}
 /* the page scrolls inside .app, not the document: Safari's toolbar then never collapses/expands while scrolling,
    so the viewport (and the fixed painted background behind it) stays perfectly still */
 html,body{overflow:hidden;overscroll-behavior:none}
+/* pin the document itself: iOS can otherwise still rubber-band / shift the whole page (and the background with it) */
+body{position:fixed;top:0;left:0;right:0;bottom:0;width:100%;touch-action:pan-y}
 .app{position:fixed;inset:0;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 body{
   font-family:var(--body);color:var(--ink);font-size:16px;line-height:1.6;
@@ -61,8 +63,8 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--gold);outl
 
 main{max-width:960px;margin:0 auto;padding:12px 16px 48px;overflow-x:clip}
 .screen{display:none}
-.screen.active{display:block;animation:enter .45s cubic-bezier(.2,.9,.3,1.1)}
-@keyframes enter{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
+.screen.active{display:block;animation:enter .35s ease-out}
+@keyframes enter{from{opacity:0}to{opacity:1}}
 
 h1,h2{font-family:var(--display);font-weight:700;text-wrap:balance;margin:0}
 h1{font-size:clamp(32px,8.5vw,52px);line-height:1.25;color:var(--c-dark);letter-spacing:.01em}
@@ -216,7 +218,7 @@ h2{font-size:clamp(26px,6.5vw,36px);line-height:1.25}
 <header class="bar">
   <button class="brand" id="brand" aria-label="กลับหน้าแรก">
     <svg viewBox="0 0 40 40" aria-hidden="true"><g fill="#f2607a"><path d="M20 4 Q27 13 20 20 Q13 13 20 4Z"/><path d="M36 20 Q27 27 20 20 Q27 13 36 20Z"/><path d="M20 36 Q13 27 20 20 Q27 27 20 36Z"/><path d="M4 20 Q13 13 20 20 Q13 27 4 20Z"/></g><circle cx="20" cy="20" r="3" fill="#f3b443"/></svg>
-    เซียมซีตำหรับเจ้าเรือน
+    เซียมซีตำรับเจ้าเรือน
   </button>
   <div class="steps" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
   <button class="mute" id="mute" aria-pressed="false">เสียง เปิด</button>
@@ -226,7 +228,7 @@ h2{font-size:clamp(26px,6.5vw,36px);line-height:1.25}
   <!-- 1 Home -->
   <section class="screen" id="s-home" aria-labelledby="h-home">
     <div class="hero">
-      <h1 id="h-home" tabindex="-1">เซียมซีตำหรับเจ้าเรือน</h1>
+      <h1 id="h-home" tabindex="-1">เซียมซีตำรับเจ้าเรือน</h1>
       <p class="lead">ค้นพบธาตุเจ้าเรือนของคุณ แล้วมาลุ้นคำทำนายสุขภาพไปพร้อมกัน</p>
       <div class="hero-cup" id="heroCup"></div>
       <button class="btn" id="startBtn">เริ่มเสี่ยงเซียมซี</button>
@@ -666,12 +668,13 @@ let busy = false;
 
 function go(name){
   state.screen = name;
+  /* jump to the top before the new screen appears — a smooth scroll running while the screen fades in looked like shaking/zooming on phones */
+  $("app").scrollTop = 0;
   SCREENS.forEach(s => $("s-" + s).classList.toggle("active", s === name));
   document.querySelectorAll(".steps i").forEach((d, i) => d.classList.toggle("on", i <= SCREENS.indexOf(name)));
   setBg(["element","shake","slip"].includes(name) ? state.element : "all");
   if (name === "home" || name === "month") setTheme(...HOME_THEME);
   else if (state.element){ const e = ELEMENTS[state.element]; setTheme(e.c, e.light, e.dark); }
-  $("app").scrollTo({ top:0, behavior: REDUCE ? "auto" : "smooth" });
   const h = document.querySelector("#s-" + name + " [tabindex='-1']"); if (h) h.focus({ preventScroll:true });
 }
 async function loading(text, ms = 750){
